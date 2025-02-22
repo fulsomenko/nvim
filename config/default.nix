@@ -3,8 +3,16 @@
 let
   files = builtins.readDir ./.;
 
+  excludedFiles = [
+    ./default.nix
+    ./fidget.nix
+  ];
+
   nixFiles = builtins.filter
-    (name: name != "default.nix" && builtins.match ".*\\.nix" name != null)
+    (name: !builtins.any (n: n == name) 
+      (builtins.map builtins.baseNameOf excludedFiles) && 
+      builtins.match ".*\\.nix" name != null
+    )
     (builtins.attrNames files);
 
   imports = map (name: ./. + "/${name}") nixFiles;
