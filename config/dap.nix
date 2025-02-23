@@ -27,7 +27,7 @@ in
             }
           ];
           position = "left";
-          size = 55;
+          size = 25;
         }
         {
           elements = [
