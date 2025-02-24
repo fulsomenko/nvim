@@ -1,3 +1,65 @@
+Requirements
+
+### Typescript nvim
+- Debugging with DAP. attach to chrome and node process and or start new debug process
+- LSP
+- Refactoring
+- Completion
+- Code Navigation & Search
+- Automated Testing & Coverage
+
+Lower priorities:
+
+2. Linting & Formatting, can we follow a .prettierrc?
+4. Version Control & Git Tools
+5. Project Management & Notes
+6. Terminal & Process Management
+
+### Plugins
+
+- CMP
+- DAP
+- LSP
+- Fugitive
+- Treesitter
+    - Treesitter-context
+    - Treesitter-textobjects
+- Telescope
+- Trouble
+    - LSP Saga
+- Bufferline / Lualine
+- Spectre
+- Surround
+- Snacks
+    - Dashboard
+- Ufo
+
+### Options
+
+- Updatetime = 100
+- number = true
+- relativenumber = true
+- colorcolumn = 80
+- autoindent = true
+- expandtab = true
+- shiftwidth = 2
+- tabstop = 2
+- smartindent = true
+- swapfile = false;
+- undofile = true;
+- clipboard = "unnamed,unnamedplus"
+
+#### fold
+- foldcolumn = 0
+- foldlevel = 99
+- foldlevelstart = 99
+- foldenable = true
+
+- viAlias = true
+
+
+---
+
 This directory contains a somewhat idiomatic[^1] `nixCats` config using [`lze`](https://github.com/BirdeeHub/lze) for lazy loading. (with a backup downloading method via `paq` and `mason` in case you want to load the directory without using `nix` at all)
 
 While the `lazy.nvim` wrapper does exist, this template shows a suggested way of using `nixCats`.
