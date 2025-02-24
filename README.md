@@ -17,22 +17,23 @@ Lower priorities:
 
 ### Plugins
 
-- CMP
-- DAP
-- LSP
-- Fugitive
-- Treesitter
-    - Treesitter-context
-    - Treesitter-textobjects
-- Telescope
-- Trouble
-    - LSP Saga
-- Bufferline / Lualine
-- Spectre
-- Surround
-- Snacks
-    - Dashboard
-- Ufo
+- [ ] CMP
+- [ ] DAP
+- [ ] LSP
+    - [ ] LSP Saga
+- [ ] Fugitive
+- [ ] Treesitter
+    - [ ] Treesitter-context
+    - [ ] Treesitter-textobjects
+- [ ] Telescope
+- [ ] Trouble
+- [ ] Transparent
+- [ ] Bufferline / Lualine
+- [ ] Spectre
+- [ ] Surround
+- [ ] Snacks
+    - [ ] Dashboard
+- [ ] Ufo
 
 ### Options
 
