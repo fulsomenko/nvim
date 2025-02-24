@@ -10,6 +10,7 @@ Requirements
 
 Lower priorities:
 
+1. Transparent nvim
 2. Linting & Formatting, can we follow a .prettierrc?
 4. Version Control & Git Tools
 5. Project Management & Notes
@@ -27,7 +28,7 @@ Lower priorities:
     - [ ] Treesitter-textobjects
 - [ ] Telescope
 - [ ] Trouble
-- [ ] Transparent
+- [x] Transparent
 - [ ] Bufferline / Lualine
 - [ ] Spectre
 - [ ] Surround

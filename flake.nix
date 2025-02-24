@@ -151,6 +151,7 @@
             vim-repeat
             plenary-nvim
             nvim-notify
+            transparent-nvim
           ];
           extra = [
             oil-nvim
