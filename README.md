@@ -22,11 +22,12 @@ Lower priorities:
 - [ ] DAP
 - [ ] LSP
     - [ ] LSP Saga
-- [ ] Fugitive
-- [ ] Treesitter
+- [x] Fugitive
+- [x] Treesitter
     - [ ] Treesitter-context
-    - [ ] Treesitter-textobjects
-- [ ] Telescope
+    - [x] Treesitter-textobjects
+    - [x] Treesitter-withAllGrammars
+- [x] Telescope
 - [ ] Trouble
 - [x] Transparent
 - [ ] Bufferline / Lualine
