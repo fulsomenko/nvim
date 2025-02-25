@@ -116,4 +116,33 @@ require('lze').load {
       require("dap-go").setup()
     end,
   },
+  {
+    "nvim-dap-js",
+    for_cat = { cat = 'debug.js', default = false },
+    on_plugin = { "nvim-dap", },
+    after = function(plugin)
+        local dap = require 'dap'
+
+        dap.adapters["pwa-node"] = {
+          type = "server",
+          host = "localhost",
+          port = "${port}",
+          executable = {
+            command = "node",
+            args = {"js-debug", "${port}"},
+          }
+        }
+        for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
+          dap.configurations[language] = {
+            {
+              type = "pwa-node",
+              request = "launch",
+              name = "Launch file",
+              program = "${file}",
+              cwd = "${workspaceFolder}",
+            },
+          }
+        end
+    end,
+  },
 }
