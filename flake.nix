@@ -192,7 +192,7 @@
             nvim-dap-virtual-text
           ];
           go = [ nvim-dap-go ];
-          js = [ pkgs.neovimPlugins.nvim-dap-vscode-js ];
+          js = [ ];
         };
         lint = with pkgs.vimPlugins; [
           nvim-lint
