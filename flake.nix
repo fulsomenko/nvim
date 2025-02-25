@@ -44,6 +44,11 @@
     #   flake = false;
     # };
 
+    "plugins-nvim-dap-vscode-js" = {
+      url = "github:mxsdev/nvim-dap-vscode-js";
+      flake = false;
+    };
+
     # neovim-nightly-overlay = {
     #   url = "github:nix-community/neovim-nightly-overlay";
     # };
@@ -121,6 +126,7 @@
         # per nvim package you export
         debug = with pkgs; {
           go = [ delve ];
+          js = [ vscode-js-debug ];
         };
         go = with pkgs; [
           gopls
@@ -191,6 +197,7 @@
             nvim-dap-virtual-text
           ];
           go = [ nvim-dap-go ];
+          js = [ pkgs.neovimPlugins.nvim-dap-vscode-js ];
         };
         lint = with pkgs.vimPlugins; [
           nvim-lint
@@ -244,6 +251,7 @@
             vim-fugitive
             vim-rhubarb
             nvim-surround
+            nvim-spectre
           ];
           extra = with pkgs.vimPlugins; [
             fidget-nvim
@@ -256,6 +264,7 @@
             # If it was included in your flake inputs as plugins-hlargs,
             # this would be how to add that plugin in your config.
             # pkgs.neovimPlugins.hlargs
+            pkgs.neovimPlugins.nvim-dap-vscode-js
           ];
         };
       };
@@ -324,6 +333,9 @@
         ];
         go = [
           [ "debug" "go" ] # yes it has to be a list of lists
+        ];
+        js = [
+          [ "debug" "js" ] # yes it has to be a list of lists
         ];
       };
     };
@@ -458,7 +470,7 @@
           # or, whatever you named the package definition in the packageDefinitions set.
           # WARNING: MAKE SURE THESE DONT CONFLICT WITH OTHER INSTALLED PACKAGES ON YOUR PATH
           # That would result in a failed build, as nixos and home manager modules validate for collisions on your path
-          aliases = [ "vim" "vimcat" ];
+          aliases = [ "vim" ];
 
           # explained below in the `regularCats` package's definition
           # OR see :help nixCats.flake.outputs.settings for all of the settings available
@@ -480,6 +492,7 @@
           # enabling this category will enable the go category,
           # and ALSO debug.go and debug.default due to our extraCats in categoryDefinitions.
           # go = true; # <- disabled but you could enable it with override or module on install
+          js = true;
 
           # this does not have an associated category of plugins, 
           # but lua can still check for it
