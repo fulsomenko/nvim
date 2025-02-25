@@ -19,8 +19,9 @@ Lower priorities:
 ### Plugins
 
 - [ ] CMP
-- [ ] DAP
-- [ ] LSP
+- [x] DAP
+    - [ ] Typescript node, chrome debug
+- [x] LSP
     - [ ] LSP Saga
 - [x] Fugitive
 - [x] Treesitter
@@ -30,7 +31,7 @@ Lower priorities:
 - [x] Telescope
 - [ ] Trouble
 - [x] Transparent
-- [ ] Bufferline / Lualine
+- [x] Bufferline / Lualine
 - [ ] Spectre
 - [ ] Surround
 - [ ] Snacks
