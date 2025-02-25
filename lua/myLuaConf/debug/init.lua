@@ -123,13 +123,14 @@ require('lze').load {
     after = function(plugin)
         local dap = require 'dap'
 
+        local b = nixCats("js-debug-path")
         dap.adapters["pwa-node"] = {
           type = "server",
           host = "localhost",
           port = "${port}",
           executable = {
             command = "node",
-            args = {"js-debug", "${port}"},
+            args = {b, "${port}"},
           }
         }
         for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do

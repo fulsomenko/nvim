@@ -495,6 +495,7 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
+          js-debug-path = "${pkgs.vscode-js-debug.outPath}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
