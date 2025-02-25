@@ -329,7 +329,7 @@
           [ "debug" "go" ] # yes it has to be a list of lists
         ];
         js = [
-          [ "debug" "js" ] # yes it has to be a list of lists
+          [ "debug" "js" ]
         ];
       };
     };
