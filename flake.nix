@@ -44,11 +44,6 @@
     #   flake = false;
     # };
 
-    "plugins-nvim-dap-vscode-js" = {
-      url = "github:mxsdev/nvim-dap-vscode-js";
-      flake = false;
-    };
-
     # neovim-nightly-overlay = {
     #   url = "github:nix-community/neovim-nightly-overlay";
     # };
@@ -264,7 +259,6 @@
             # If it was included in your flake inputs as plugins-hlargs,
             # this would be how to add that plugin in your config.
             # pkgs.neovimPlugins.hlargs
-            pkgs.neovimPlugins.nvim-dap-vscode-js
           ];
         };
       };
