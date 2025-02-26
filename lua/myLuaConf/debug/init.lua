@@ -122,14 +122,14 @@ require('lze').load {
     on_plugin = { "nvim-dap", },
     after = function(plugin)
       local dap = require 'dap'
-      local b = nixCats("js-debug-path")
+      local debug = nixCats("js-debug-path")
       dap.adapters["pwa-node"] = {
         type = "server",
         host = "localhost",
         port = "${port}",
         executable = {
           command = "node",
-          args = { b, "${port}",  },
+          args = { debug, "${port}",  },
         }
       }
 
