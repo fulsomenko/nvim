@@ -121,45 +121,41 @@ require('lze').load {
     for_cat = { cat = 'debug.js', default = false },
     on_plugin = { "nvim-dap", },
     after = function(plugin)
-        local dap = require 'dap'
-        local b = nixCats("js-debug-path")
-        dap.adapters["pwa-node"] = {
-          type = "server",
-          host = "localhost",
-          port = "${port}",
-          executable = {
-            command = "node",
-            args = {b, "${port}"},
-          }
+      local dap = require 'dap'
+      local b = nixCats("js-debug-path")
+      dap.adapters["pwa-node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = { b, "${port}",  },
         }
-        for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
-          dap.configurations[language] = {
-      {
-        name = "Launch",
-        type = "pwa-node",
-        request = "launch",
---      cwd = vim.fn.getcwd(),
-        cwd = "${workspaceFolder}",
---      runtimeExecutable = "npm", -- Specify npm as the runtime executable
---      args = { "run", "start:debug" }, -- Pass the run command and script name as arguments
-        sourceMaps = true,
---      protocol = "inspector",
---      console = "integratedTerminal",
-        outFiles = { "${workspaceFolder}/dist/**/*.js" },
-        skipFiles = {
-          "${workspaceFolder}/node_modules/**/*.js",
-          "<node_internals>/**",
-        },
-      },
-            -- {
-            --   type = "pwa-node",
-            --   request = "launch",
-            --   name = "Launch file",
-            --   program = "${file}",
-            --   cwd = "${workspaceFolder}",
-            -- },
-          }
-        end
+      }
+
+      for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
+        dap.configurations[language] = {
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "ESM Launch file",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+            sourceMaps = true,
+            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
+            runtimeArgs = { "--loader", "ts-node/esm", "--no-warnings=ExperimentalWarning", },
+            outFiles = {
+              "${workspaceFolder}/dist/**/*.js",
+              "${workspaceFolder}/**/dist/**/*.js",
+            },
+            skipFiles = {
+              "${workspaceFolder}/node_modules/**/*.js",
+              "${workspaceFolder}/**/node_modules/**/*.js",
+              "<node_internals>/**",
+            },
+          },
+        }
+      end
     end,
   },
 }
