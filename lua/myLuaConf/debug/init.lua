@@ -134,13 +134,30 @@ require('lze').load {
         }
         for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
           dap.configurations[language] = {
-            {
-              type = "pwa-node",
-              request = "launch",
-              name = "Launch file",
-              program = "${file}",
-              cwd = "${workspaceFolder}",
-            },
+      {
+        name = "Launch",
+        type = "pwa-node",
+        request = "launch",
+--      cwd = vim.fn.getcwd(),
+        cwd = "${workspaceFolder}",
+--      runtimeExecutable = "npm", -- Specify npm as the runtime executable
+--      args = { "run", "start:debug" }, -- Pass the run command and script name as arguments
+        sourceMaps = true,
+--      protocol = "inspector",
+--      console = "integratedTerminal",
+        outFiles = { "${workspaceFolder}/dist/**/*.js" },
+        skipFiles = {
+          "${workspaceFolder}/node_modules/**/*.js",
+          "<node_internals>/**",
+        },
+      },
+            -- {
+            --   type = "pwa-node",
+            --   request = "launch",
+            --   name = "Launch file",
+            --   program = "${file}",
+            --   cwd = "${workspaceFolder}",
+            -- },
           }
         end
     end,
