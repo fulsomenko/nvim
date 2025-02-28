@@ -74,7 +74,7 @@ if nixCats('go') then
 end
 
 if nixCats('js') then
-  servers.tsserver = {}
+  servers.ts_ls = {}
 end
 
 -- This is this flake's version of what kickstarter has set up for mason handlers.
