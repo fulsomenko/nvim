@@ -20,8 +20,18 @@ Lower priorities:
 
 - [ ] CMP
 - [x] DAP
-    - [ ] Typescript node, chrome debug
+    - [ ] Typescript node debug
+        - [ ] new process
+        - [ ] attach
+        - [ ] esm
+        - [ ] commonjs
+    - [ ] Typescript chrome debug
+        - [ ] new process
+        - [ ] attach
+        - [ ] esm
+        - [ ] commonjs
 - [x] LSP
+    - [x] TS_LS
     - [ ] LSP Saga
 - [x] Fugitive
 - [x] Treesitter
