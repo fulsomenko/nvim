@@ -473,7 +473,7 @@
           # explained below in the `regularCats` package's definition
           # OR see :help nixCats.flake.outputs.settings for all of the settings available
           wrapRc = true;
-          configDirName = "nixCats-nvim";
+          configDirName = "mox-nvim";
           # neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.neovim;
         };
         # enable the categories you want from categoryDefinitions
