@@ -385,7 +385,6 @@
           # enabling this category will enable the go category,
           # and ALSO debug.go and debug.default due to our extraCats in categoryDefinitions.
           # go = true; # <- disabled but you could enable it with override or module on install
-          js = true;
 
           # this does not have an associated category of plugins, 
           # but lua can still check for it
