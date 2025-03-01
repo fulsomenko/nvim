@@ -134,6 +134,7 @@
         ];
         # and easily check if they are included in lua
         format = with pkgs; [
+          prettierd
         ];
         neonixdev = {
           # also you can do this.
