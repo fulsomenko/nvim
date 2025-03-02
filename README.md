@@ -43,7 +43,7 @@ Lower priorities:
 - [x] Transparent
 - [x] Bufferline / Lualine
 - [ ] Spectre
-- [ ] Surround
+- [x] Surround
 - [ ] Snacks
     - [ ] Dashboard
 - [ ] Ufo
