@@ -138,6 +138,24 @@ require('lze').load {
           {
             type = "pwa-node",
             request = "launch",
+            name = "CJS Launch file",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+            sourceMaps = true,
+            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
+            outFiles = {
+              "${workspaceFolder}/dist/**/*.js",
+              "${workspaceFolder}/**/dist/**/*.js",
+            },
+            skipFiles = {
+              "${workspaceFolder}/node_modules/**/*.js",
+              "${workspaceFolder}/**/node_modules/**/*.js",
+              "<node_internals>/**",
+            },
+          },
+          {
+            type = "pwa-node",
+            request = "launch",
             name = "ESM Launch file",
             program = "${file}",
             cwd = "${workspaceFolder}",
