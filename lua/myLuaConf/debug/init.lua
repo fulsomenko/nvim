@@ -172,6 +172,24 @@ require('lze').load {
               "<node_internals>/**",
             },
           },
+          {
+            name = 'Attach',
+            type = 'pwa-node',
+            request = 'attach',
+            port = 9230,
+            sourceMaps = true,
+            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
+            outFiles = {
+              "${workspaceFolder}/dist/**/*.js",
+              "${workspaceFolder}/**/dist/**/*.js",
+            },
+            skipFiles = {
+              "${workspaceFolder}/node_modules/**/*.js",
+              "${workspaceFolder}/**/node_modules/**/*.js",
+              "<node_internals>/**",
+            },
+            cwd = '${workspaceFolder}',
+          },
         }
       end
     end,
