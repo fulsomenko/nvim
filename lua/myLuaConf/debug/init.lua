@@ -176,7 +176,6 @@ require('lze').load {
             name = 'Attach',
             type = 'pwa-node',
             request = 'attach',
-            port = 9230,
             sourceMaps = true,
             resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
             outFiles = {
