@@ -245,8 +245,7 @@ require('lze').load {
               "${workspaceFolder}/**/dist/**/*.js",
             },
             skipFiles = {
-              "${workspaceFolder}/node_modules/**/*.js",
-              "${workspaceFolder}/**/node_modules/**/*.js",
+              "${workspaceFolder}/node_modules/**/*",
               "<node_internals>/**",
             },
           },
