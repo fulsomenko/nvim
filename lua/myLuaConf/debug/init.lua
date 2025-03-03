@@ -133,6 +133,16 @@ require('lze').load {
         }
       }
 
+      dap.adapters["pwa-chrome"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = { debug, "${port}",  },
+        }
+      }
+
       for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
         dap.configurations[language] = {
           {
@@ -208,6 +218,37 @@ require('lze').load {
               "<node_internals>/**",
             },
             cwd = '${workspaceFolder}',
+          },
+          {
+            type = "pwa-chrome",
+            request = "launch",
+            name = "Launch Chrome with \"localhost\"",
+            url = function()
+              local co = coroutine.running()
+              return coroutine.create(function()
+                vim.ui.input({ prompt = 'Enter URL: ', default = 'http://localhost:3000' }, function(url)
+                  if url == nil or url == '' then
+                    return
+                  else
+                    coroutine.resume(co, url)
+                  end
+                end)
+              end)
+            end,
+            webRoot = '${workspaceFolder}',
+            protocol = 'inspector',
+            sourceMaps = true,
+            -- userDataDir = false,
+            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
+            outFiles = {
+              "${workspaceFolder}/dist/**/*.js",
+              "${workspaceFolder}/**/dist/**/*.js",
+            },
+            skipFiles = {
+              "${workspaceFolder}/node_modules/**/*.js",
+              "${workspaceFolder}/**/node_modules/**/*.js",
+              "<node_internals>/**",
+            },
           },
         }
       end
