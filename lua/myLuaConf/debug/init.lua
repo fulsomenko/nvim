@@ -250,6 +250,25 @@ require('lze').load {
               "<node_internals>/**",
             },
           },
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Jest Esm Launch file",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+            sourceMaps = true,
+            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
+            runtimeArgs = {'--inspect-brk', 'node_modules/jest/bin/jest.js', '--no-coverage',  '--', '{file}', "--experimental-vm-modules" },
+            outFiles = {
+              "${workspaceFolder}/dist/**/*.js",
+              "${workspaceFolder}/**/dist/**/*.js",
+            },
+            skipFiles = {
+              "${workspaceFolder}/node_modules/**/*.js",
+              "${workspaceFolder}/**/node_modules/**/*.js",
+              "<node_internals>/**",
+            },
+          },
         }
       end
     end,
