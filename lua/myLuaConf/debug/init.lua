@@ -190,6 +190,26 @@ require('lze').load {
             },
             cwd = '${workspaceFolder}',
           },
+          {
+            name = 'Attach (Pick Process)',
+            type = 'pwa-node',
+            request = 'attach',
+            processId = function()
+							return require("dap.utils").pick_process({ filter = "^node" })
+						end,
+            sourceMaps = true,
+            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
+            outFiles = {
+              "${workspaceFolder}/dist/**/*.js",
+              "${workspaceFolder}/**/dist/**/*.js",
+            },
+            skipFiles = {
+              "${workspaceFolder}/node_modules/**/*.js",
+              "${workspaceFolder}/**/node_modules/**/*.js",
+              "<node_internals>/**",
+            },
+            cwd = '${workspaceFolder}',
+          },
         }
       end
     end,
