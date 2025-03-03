@@ -238,15 +238,15 @@ require('lze').load {
             webRoot = '${workspaceFolder}',
             protocol = 'inspector',
             sourceMaps = true,
-            -- userDataDir = false,
+--            userDataDir = false,
             resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
             outFiles = {
               "${workspaceFolder}/dist/**/*.js",
               "${workspaceFolder}/**/dist/**/*.js",
             },
             skipFiles = {
-              "**/node_modules/**",
-              "${workspaceFolder}/**/node_modules/**",
+              "**/node_modules/**/*",
+              "**/@vite/*",
               "<node_internals>/**",
             },
           },
