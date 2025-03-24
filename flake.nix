@@ -122,6 +122,7 @@
         debug = with pkgs; {
           go = [ delve ];
           js = [ vscode-js-debug ];
+          java = [ ];
         };
         go = with pkgs; [
           gopls
@@ -132,6 +133,7 @@
         js = with pkgs; [
           typescript-language-server
         ];
+        java = with pkgs; [ jdt-language-server vimPlugins.nvim-jdtls ];
         # and easily check if they are included in lua
         format = with pkgs; [
           prettierd
@@ -196,7 +198,8 @@
             nvim-dap-virtual-text
           ];
           go = [ nvim-dap-go ];
-          js = [ ];
+          js = [];
+          java = [];
         };
         lint = with pkgs.vimPlugins; [
           nvim-lint
@@ -333,6 +336,9 @@
           [ "debug" "go" ] # yes it has to be a list of lists
         ];
         js = [
+          [ "debug" "js" ]
+        ];
+        java = [
           [ "debug" "js" ]
         ];
       };
@@ -500,6 +506,57 @@
           themer = true;
           colorscheme = "onedark";
           js-debug-path = "${pkgs.vscode-js-debug.outPath}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
+        };
+        extra = {
+          # to keep the categories table from being filled with non category things that you want to pass
+          # there is also an extra table you can use to pass extra stuff.
+          # but you can pass all the same stuff in any of these sets and access it in lua
+          nixdExtras = {
+            nixpkgs = nixpkgs;
+          };
+        };
+      };
+
+      jvim = { ... }: {
+        # these also recieve our pkgs variable
+        # see :help nixCats.flake.outputs.packageDefinitions
+        settings = {
+          # The name of the package, and the default launch name,
+          # and the name of the .desktop file, is `nixCats`,
+          # or, whatever you named the package definition in the packageDefinitions set.
+          # WARNING: MAKE SURE THESE DONT CONFLICT WITH OTHER INSTALLED PACKAGES ON YOUR PATH
+          # That would result in a failed build, as nixos and home manager modules validate for collisions on your path
+          aliases = [ ];
+
+          # explained below in the `regularCats` package's definition
+          # OR see :help nixCats.flake.outputs.settings for all of the settings available
+          wrapRc = true;
+          configDirName = "mox-nvim";
+          # neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.neovim;
+        };
+        # enable the categories you want from categoryDefinitions
+        categories = {
+          markdown = true;
+          general = true;
+          lint = true;
+          format = true;
+          neonixdev = true;
+          test = {
+            subtest1 = true;
+          };
+
+          # enabling this category will enable the go category,
+          # and ALSO debug.go and debug.default due to our extraCats in categoryDefinitions.
+          # go = true; # <- disabled but you could enable it with override or module on install
+          java = true;
+
+          # this does not have an associated category of plugins, 
+          # but lua can still check for it
+          lspDebugMode = false;
+          # you could also pass something else:
+          # see :help nixCats
+          themer = true;
+          colorscheme = "onedark";
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
