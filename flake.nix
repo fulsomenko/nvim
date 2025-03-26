@@ -472,7 +472,7 @@
           };
         };
       };
-      nvim = { pkgs, ... }@misc: {
+      jsvim = { pkgs, ... }@misc: {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
