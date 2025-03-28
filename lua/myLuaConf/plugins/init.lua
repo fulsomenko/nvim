@@ -67,6 +67,7 @@ require('lze').load {
   { import = "myLuaConf.plugins.telescope", },
   { import = "myLuaConf.plugins.treesitter", },
   { import = "myLuaConf.plugins.completion", },
+  { import = "myLuaConf.plugins.snacks", },
   {
     "lazydev.nvim",
     for_cat = 'neonixdev',

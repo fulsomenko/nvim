@@ -249,6 +249,9 @@
             telescope-ui-select-nvim
             telescope-nvim
           ];
+          snacks = with pkgs.vimPlugins; [
+            snacks-nvim
+          ];
           always = with pkgs.vimPlugins; [
             nvim-lspconfig
             lualine-nvim
