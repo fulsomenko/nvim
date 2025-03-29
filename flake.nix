@@ -133,9 +133,7 @@
           go-tools
           gccgo
         ];
-        js = with pkgs; [
-          typescript-language-server
-        ];
+        js = with pkgs; [ typescript-language-server ];
         java = with pkgs; [ jdt-language-server vimPlugins.nvim-jdtls ];
         # and easily check if they are included in lua
         format = with pkgs; [
