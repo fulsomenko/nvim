@@ -515,6 +515,7 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
+          appName = "jsvim";
           js-debug-path = "${pkgs.vscode-js-debug.outPath}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
         };
         extra = {
@@ -567,6 +568,7 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
+          appName = "jvim";
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
@@ -618,6 +620,7 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
+          appName = "sharpvim";
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
