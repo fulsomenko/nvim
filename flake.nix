@@ -579,7 +579,7 @@
         };
       };
 
-      sharpvim = { ... }: {
+      sharpvim = { pkgs, ... }: {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
@@ -619,6 +619,8 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
+          ls-path = "${pkgs.omnisharp-roslyn.outPath}/bin/OmniSharp";
+
           appName = "sharpvim";
         };
         extra = {
