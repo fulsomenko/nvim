@@ -526,7 +526,7 @@
         };
       };
 
-      jvim = { ... }: {
+      jvim = { pkgs, ... }: {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
@@ -567,6 +567,7 @@
           themer = true;
           colorscheme = "onedark";
           appName = "jvim";
+          ls-path = "${pkgs.jdt-language-server.outPath}/bin/jdtls";
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
