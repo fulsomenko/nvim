@@ -126,7 +126,7 @@
           java = [];
 
         };
-        csharp = with pkgs; [ vimPlugins.omnisharp-extended-lsp-nvim ];
+        csharp = with pkgs; [ omnisharp-roslyn vimPlugins.omnisharp-extended-lsp-nvim ];
         go = with pkgs; [
           gopls
           gotools
