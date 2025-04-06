@@ -158,6 +158,7 @@
             lze
             vim-repeat
             plenary-nvim
+            ollama-nvim
             nvim-notify
             transparent-nvim
           ];
