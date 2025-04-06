@@ -36,7 +36,7 @@ return {
           action = "display",
         },
         Selection = {
-          prompt = "As an expert software engineer, give suggestions to improve the code outlined in this snippet: \n\nCurrent Sample:\n\n$sel. Please provide your solution.",
+          prompt = "As an expert software engineer, give suggestions to improve the code based on the problem statement and the sample outlined in the snippet: \n\nProblem: $input\n\nSample:\n\n$sel. \n\nPlease provide your solution.",
           input_label = "> ",
           model = "deepseek-r1:1.5b",
           action = "display",
