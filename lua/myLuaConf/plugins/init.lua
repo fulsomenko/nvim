@@ -129,6 +129,15 @@ require('lze').load {
     end,
   },
   {
+    "nvim-spectre",
+    for_cat = 'general.always',
+    event = "DeferredUIEnter",
+    -- keys = "",
+    after = function(plugin)
+      require('spectre').setup()
+    end,
+  },
+  {
     "nvim-surround",
     for_cat = 'general.always',
     event = "DeferredUIEnter",
