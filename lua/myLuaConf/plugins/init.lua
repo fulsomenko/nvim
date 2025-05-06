@@ -69,6 +69,7 @@ require('lze').load {
   { import = "myLuaConf.plugins.completion", },
   { import = "myLuaConf.plugins.snacks", },
   { import = "myLuaConf.plugins.ollama", },
+  { import = "myLuaConf.plugins.nerdtree", },
 
   {
     "lazydev.nvim",

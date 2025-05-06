@@ -161,6 +161,7 @@
             ollama-nvim
             nvim-notify
             transparent-nvim
+            nerdtree 
           ];
           extra = [
             oil-nvim
