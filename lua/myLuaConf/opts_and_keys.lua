@@ -153,3 +153,15 @@ vim.keymap.set('i', '<C-p>', '<C-r><C-p>+', { noremap = true, silent = true, des
 vim.keymap.set("x", "<leader>P", '"_dP', { noremap = true, silent = true, desc = 'Paste over selection without erasing unnamed register' })
 
 
+-- Paths
+vim.keymap.set('n', '<localleader>yp', function()
+  vim.fn.setreg('+', vim.fn.expand('%:p:.'))
+end, { desc = 'Copy file path (relative to cwd)' })
+
+vim.keymap.set('n', '<localleader>yd', function()
+  vim.fn.setreg('+', vim.fn.expand('%:h'))
+end, { desc = 'Copy directory path' })
+
+vim.keymap.set('n', '<localleader>yf', function()
+  vim.fn.setreg('+', vim.fn.expand('%:t:r'))
+end, { desc = 'Copy file name without extension' })
