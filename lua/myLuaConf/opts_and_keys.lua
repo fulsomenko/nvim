@@ -165,3 +165,17 @@ end, { desc = 'Copy directory path' })
 vim.keymap.set('n', '<localleader>yf', function()
   vim.fn.setreg('+', vim.fn.expand('%:t:r'))
 end, { desc = 'Copy file name without extension' })
+
+-- Function to copy the paths of all buffers
+vim.keymap.set('n', '<localleader>ya', function()
+  local paths = {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_get_option(buf, 'buflisted') then
+      local name = vim.api.nvim_buf_get_name(buf)
+      if name ~= '' then
+        table.insert(paths, name)
+      end
+    end
+  end
+  vim.fn.setreg('+', table.concat(paths, '\n'))
+end, { desc = 'Copy all open buffer paths' })
