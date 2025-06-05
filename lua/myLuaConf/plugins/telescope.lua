@@ -99,6 +99,8 @@ return {
         vim.cmd.packadd("telescope-ui-select.nvim")
     end,
     after = function (plugin)
+      local actions = require('telescope.actions')
+
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
@@ -107,12 +109,12 @@ return {
           mappings = {
             i = {
               ['<c-enter>'] = 'to_fuzzy_refine',
-              ['C-j'] = 'move_selection_next',
-              ['C-k'] = 'move_selection_previous',
+              ['C-j'] = actions.move_selection_next,
+              ['C-k'] = actions.move_selection_previous,
             },
             n = {
-              ['j'] = 'move_selection_next',
-              ['k'] = 'move_selection_previous',
+              ['j'] = actions.move_selection_next,
+              ['k'] = actions.move_selection_previous,
             },
           },
         },
