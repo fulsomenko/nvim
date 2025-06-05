@@ -134,13 +134,12 @@ require('lze').load {
       }
 
       dap.adapters["node"] = {
-        type = "server",
-        host = "localhost",
-        port = "${port}",
-        executable = {
-          command = "node",
-          args = { debug, "${port}",  },
-        }
+        type = "pwa-chrome",
+        request = "launch",
+        name = "Start Chrome with \"localhost\"",
+        url = "http://localhost:3000",
+        webRoot = "${workspaceFolder}",
+        userDataDir = "${workspaceFolder}/.vscode/vscode-chrome-debug-userdatadir"
       }
 
       dap.adapters["pwa-chrome"] = {
