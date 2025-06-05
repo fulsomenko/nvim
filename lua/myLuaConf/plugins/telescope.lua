@@ -109,8 +109,8 @@ return {
           mappings = {
             i = {
               ['<c-enter>'] = 'to_fuzzy_refine',
-              ['C-j'] = actions.move_selection_next,
-              ['C-k'] = actions.move_selection_previous,
+              ['<C-j>'] = actions.move_selection_next,
+              ['<C-k>'] = actions.move_selection_previous,
             },
             n = {
               ['j'] = actions.move_selection_next,
