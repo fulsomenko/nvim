@@ -133,6 +133,16 @@ require('lze').load {
         }
       }
 
+      dap.adapters["node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = { debug, "${port}",  },
+        }
+      }
+
       dap.adapters["pwa-chrome"] = {
         type = "server",
         host = "localhost",
