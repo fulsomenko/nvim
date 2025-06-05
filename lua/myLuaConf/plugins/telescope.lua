@@ -105,7 +105,16 @@ return {
         --
         defaults = {
           mappings = {
-            i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+            i = {
+              ['<c-enter>'] = 'to_fuzzy_refine',
+              ['C-j'] = 'move_selection_next',
+              ['C-k'] = 'move_selection_previous',
+            },
+            n = {
+              ['j'] = 'move_selection_next',
+              ['k'] = 'move_selection_previous',
+
+            },
           },
         },
         -- pickers = {}
