@@ -113,7 +113,6 @@ return {
             n = {
               ['j'] = 'move_selection_next',
               ['k'] = 'move_selection_previous',
-
             },
           },
         },
