@@ -66,6 +66,7 @@ end
 require('lze').load {
   { import = "myLuaConf.plugins.telescope", },
   { import = "myLuaConf.plugins.treesitter", },
+  { import = "myLuaConf.plugins.trouble", },
   { import = "myLuaConf.plugins.completion", },
   { import = "myLuaConf.plugins.snacks", },
   { import = "myLuaConf.plugins.ollama", },
@@ -189,7 +190,6 @@ require('lze').load {
     -- keys = "",
     -- colorscheme = "",
     after = function (plugin)
-
       require('lualine').setup({
         options = {
           icons_enabled = false,

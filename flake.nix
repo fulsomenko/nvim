@@ -256,6 +256,7 @@
             nvim-lspconfig
             lualine-nvim
             gitsigns-nvim
+            trouble-nvim
             vim-sleuth
             vim-fugitive
             vim-rhubarb
