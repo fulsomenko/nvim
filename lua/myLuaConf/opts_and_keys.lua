@@ -40,7 +40,7 @@ vim.opt.scrolloff = 10
 vim.wo.number = true
 
 -- Enable mouse mode
-vim.o.mouse = 'a'
+vim.o.mouse = ''
 
 -- Indent
 -- vim.o.smarttab = true
