@@ -217,6 +217,9 @@
         neonixdev = with pkgs.vimPlugins; [
           lazydev-nvim
         ];
+        ai = with pkgs.vimPlugins; [
+          claude-code-nvim
+        ];
         general = {
           cmp = with pkgs.vimPlugins; [
             # cmp stuff
@@ -352,6 +355,10 @@
         java = [
           [ "debug" "java" ]
         ];
+        # Enable AI category when general is enabled (since all packages have general = true)
+        general = [
+          [ "ai" ]
+        ];
       };
     };
 
@@ -395,6 +402,7 @@
           lint = true;
           format = true;
           neonixdev = true;
+          ai = true;
           test = {
             subtest1 = true;
           };
@@ -500,6 +508,7 @@
           lint = true;
           format = true;
           neonixdev = true;
+          ai = true;
           test = {
             subtest1 = true;
           };
