@@ -123,14 +123,15 @@ require('lze').load {
     after = function(plugin)
       local dap = require 'dap'
       local debug = nixCats("js-debug-path")
+      -- Proper pwa-node adapter with error handling
       dap.adapters["pwa-node"] = {
         type = "server",
         host = "localhost",
         port = "${port}",
         executable = {
           command = "node",
-          args = { debug, "${port}",  },
-        }
+          args = { debug, "${port}" },
+        },
       }
 
       dap.adapters["pwa-chrome"] = {
@@ -143,133 +144,34 @@ require('lze').load {
         }
       }
 
+      -- Handle mason-nvim-dap setup for non-nix environments without letting it override our configs
+      if not require('nixCatsUtils').isNixCats then
+        require("mason-nvim-dap").setup({
+          automatic_setup = false, -- Don't auto-setup configurations
+          handlers = {}, -- No handlers to prevent automatic configuration
+        })
+      end
+
+      -- Clear any existing configurations to avoid conflicts
+      dap.configurations.typescript = {}
+      dap.configurations.javascript = {}
+      dap.configurations.typescriptreact = {}
+      dap.configurations.javascriptreact = {}
+
+      -- Node.js attach configurations
       for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
         dap.configurations[language] = {
           {
+            name = "Attach to Node.js",
             type = "pwa-node",
-            request = "launch",
-            name = "CJS Launch file",
-            program = "${file}",
-            cwd = "${workspaceFolder}",
+            request = "attach",
+            address = "localhost",
+            port = 9229,
+            localRoot = vim.fn.getcwd(),
+            remoteRoot = vim.fn.getcwd(),
             sourceMaps = true,
-            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
-            outFiles = {
-              "${workspaceFolder}/dist/**/*.js",
-              "${workspaceFolder}/**/dist/**/*.js",
-            },
-            skipFiles = {
-              "${workspaceFolder}/node_modules/**/*.js",
-              "${workspaceFolder}/**/node_modules/**/*.js",
-              "<node_internals>/**",
-            },
-          },
-          {
-            type = "pwa-node",
-            request = "launch",
-            name = "ESM Launch file",
-            program = "${file}",
-            cwd = "${workspaceFolder}",
-            sourceMaps = true,
-            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
-            runtimeArgs = { "--loader", "ts-node/esm", "--no-warnings=ExperimentalWarning", },
-            outFiles = {
-              "${workspaceFolder}/dist/**/*.js",
-              "${workspaceFolder}/**/dist/**/*.js",
-            },
-            skipFiles = {
-              "${workspaceFolder}/node_modules/**/*.js",
-              "${workspaceFolder}/**/node_modules/**/*.js",
-              "<node_internals>/**",
-            },
-          },
-          {
-            name = 'Attach',
-            type = 'pwa-node',
-            request = 'attach',
-            sourceMaps = true,
-            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
-            outFiles = {
-              "${workspaceFolder}/dist/**/*.js",
-              "${workspaceFolder}/**/dist/**/*.js",
-            },
-            skipFiles = {
-              "${workspaceFolder}/node_modules/**/*.js",
-              "${workspaceFolder}/**/node_modules/**/*.js",
-              "<node_internals>/**",
-            },
-            cwd = '${workspaceFolder}',
-          },
-          {
-            name = 'Attach (Pick Process)',
-            type = 'pwa-node',
-            request = 'attach',
-            processId = function()
-							return require("dap.utils").pick_process({ filter = "^node" })
-						end,
-            sourceMaps = true,
-            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
-            outFiles = {
-              "${workspaceFolder}/dist/**/*.js",
-              "${workspaceFolder}/**/dist/**/*.js",
-            },
-            skipFiles = {
-              "${workspaceFolder}/node_modules/**",
-              "${workspaceFolder}/node_modules/**/*.js",
-              "${workspaceFolder}/**/node_modules/**/*.js",
-              "<node_internals>/**",
-            },
-            cwd = '${workspaceFolder}',
-          },
-          {
-            type = "pwa-chrome",
-            request = "launch",
-            name = "Launch Chrome with \"localhost\"",
-            url = function()
-              local co = coroutine.running()
-              return coroutine.create(function()
-                vim.ui.input({ prompt = 'Enter URL: ', default = 'http://localhost:5173' }, function(url)
-                  if url == nil or url == '' then
-                    return
-                  else
-                    coroutine.resume(co, url)
-                  end
-                end)
-              end)
-            end,
-            webRoot = '${workspaceFolder}',
-            protocol = 'inspector',
-            sourceMaps = true,
---            userDataDir = false,
-            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
-            outFiles = {
-              "${workspaceFolder}/dist/**/*.js",
-              "${workspaceFolder}/**/dist/**/*.js",
-            },
-            skipFiles = {
-              "${workspaceFolder}/node_modules/**",
-              "**/node_modules/**/*",
-              "**/@vite/*",
-              "<node_internals>/**",
-            },
-          },
-          {
-            type = "pwa-node",
-            request = "launch",
-            name = "Jest Esm Launch file",
-            program = "${file}",
-            cwd = "${workspaceFolder}",
-            sourceMaps = true,
-            resolveSourceMapLocations = { "${workspaceFolder}/**", "!**/node_modules/**"},
-            runtimeArgs = {'--inspect-brk', 'node_modules/jest/bin/jest.js', '--no-coverage',  '--', '{file}', "--experimental-vm-modules" },
-            outFiles = {
-              "${workspaceFolder}/dist/**/*.js",
-              "${workspaceFolder}/**/dist/**/*.js",
-            },
-            skipFiles = {
-              "${workspaceFolder}/node_modules/**/*.js",
-              "${workspaceFolder}/**/node_modules/**/*.js",
-              "<node_internals>/**",
-            },
+            skipFiles = { "<node_internals>/**" },
+            trace = true, -- Enable tracing for debugging
           },
         }
       end
