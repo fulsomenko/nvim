@@ -123,16 +123,33 @@ require('lze').load {
     after = function(plugin)
       local dap = require 'dap'
       local debug = nixCats("js-debug-path")
-      -- Proper pwa-node adapter with error handling
-      dap.adapters["pwa-node"] = {
-        type = "server",
-        host = "localhost",
-        port = "${port}",
-        executable = {
-          command = "node",
-          args = { debug, "${port}" },
-        },
+      -- Use node2 adapter which works directly with Node.js inspector
+      dap.adapters["node"] = {
+        type = "executable",
+        command = "node",
+        args = {
+          vim.fn.stdpath("data") .. "/mason/bin/node-debug2-adapter"
+        }
       }
+
+      -- Fallback if mason adapter doesn't exist - direct inspector connection
+      if vim.fn.executable(vim.fn.stdpath("data") .. "/mason/bin/node-debug2-adapter") == 0 then
+        dap.adapters["node"] = function(callback, config)
+          -- For attach requests, connect directly to the inspector port
+          if config.request == "attach" then
+            callback({
+              type = "server",
+              host = config.address or "localhost",
+              port = config.port or 9229
+            })
+          else
+            callback(nil, "Only attach mode supported")
+          end
+        end
+      end
+
+      -- Keep pwa-node as alias
+      dap.adapters["pwa-node"] = dap.adapters["node"]
 
       dap.adapters["pwa-chrome"] = {
         type = "server",
@@ -158,11 +175,12 @@ require('lze').load {
       dap.configurations.typescriptreact = {}
       dap.configurations.javascriptreact = {}
 
-      -- Node.js attach configurations
+      -- Comprehensive Node.js and browser debugging configurations
       for _, language in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
         dap.configurations[language] = {
+          -- Standard Node.js attach (default port)
           {
-            name = "Attach to Node.js",
+            name = "Attach to Node.js (port 9229)",
             type = "pwa-node",
             request = "attach",
             address = "localhost",
@@ -170,11 +188,225 @@ require('lze').load {
             localRoot = vim.fn.getcwd(),
             remoteRoot = vim.fn.getcwd(),
             sourceMaps = true,
-            skipFiles = { "<node_internals>/**" },
-            trace = true, -- Enable tracing for debugging
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
+          },
+
+          -- Custom port attach
+          {
+            name = "Attach to Node.js (custom port)",
+            type = "pwa-node",
+            request = "attach",
+            address = "localhost",
+            port = function()
+              return vim.fn.input("Debug port: ", "9229")
+            end,
+            localRoot = vim.fn.getcwd(),
+            remoteRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
+          },
+
+          -- Process picker - attach to any running Node process
+          {
+            name = "Attach to running Node process",
+            type = "pwa-node",
+            request = "attach",
+            processId = function()
+              return require("dap.utils").pick_process({ filter = "node" })
+            end,
+            localRoot = vim.fn.getcwd(),
+            remoteRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
+          },
+
+          -- Attach to Chrome/Browser
+          {
+            name = "Attach to Chrome",
+            type = "pwa-chrome",
+            request = "attach",
+            port = 9222,
+            webRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
+          },
+
+          -- Launch Chrome with custom URL
+          {
+            name = "Launch Chrome with URL",
+            type = "pwa-chrome",
+            request = "launch",
+            url = function()
+              return vim.fn.input("URL: ", "http://localhost:3000")
+            end,
+            webRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**", "**/webpack/**" },
+          },
+
+          -- Specific configurations for your running services
+          {
+            name = "Attach to define (9233)",
+            type = "node",
+            request = "attach",
+            address = "localhost",
+            port = 9233,
+            localRoot = vim.fn.getcwd(),
+            remoteRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
+          },
+
+          {
+            name = "Attach to viewer (9231)",
+            type = "node",
+            request = "attach",
+            address = "localhost",
+            port = 9231,
+            localRoot = vim.fn.getcwd(),
+            remoteRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
+          },
+
+          {
+            name = "Attach to editor (9236)",
+            type = "node",
+            request = "attach",
+            address = "localhost",
+            port = 9236,
+            localRoot = vim.fn.getcwd(),
+            remoteRoot = vim.fn.getcwd(),
+            sourceMaps = true,
+            skipFiles = { "<node_internals>/**", "node_modules/**" },
           },
         }
       end
+    end,
+  },
+  {
+    "nvim-dap",
+    for_cat = { cat = 'debug.zig', default = false },
+    after = function(plugin)
+      local dap = require 'dap'
+
+      -- LLDB adapter configuration for Zig
+      dap.adapters.lldb = {
+        type = 'executable',
+        command = 'lldb-vscode',
+        name = 'lldb'
+      }
+
+      -- Zig debug configurations
+      dap.configurations.zig = {
+        {
+          name = "Launch Zig Program",
+          type = "lldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/zig-out/bin/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          args = {},
+          runInTerminal = false,
+        },
+        {
+          name = "Launch Zig Test",
+          type = "lldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to test executable: ', vim.fn.getcwd() .. '/zig-cache/o/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          args = {},
+        },
+        {
+          name = "Attach to running Zig process",
+          type = "lldb",
+          request = "attach",
+          pid = function()
+            return require("dap.utils").pick_process({ filter = "zig" })
+          end,
+          cwd = '${workspaceFolder}',
+        },
+      }
+    end,
+  },
+  {
+    "nvim-dap",
+    for_cat = { cat = 'debug.rust', default = false },
+    after = function(plugin)
+      local dap = require 'dap'
+
+      -- CodeLLDB adapter configuration for Rust
+      if require('nixCatsUtils').isNixCats then
+        local codelldb_path = nixCats("codelldb-path") or "codelldb"
+        dap.adapters.codelldb = {
+          type = 'server',
+          port = "${port}",
+          executable = {
+            command = codelldb_path,
+            args = {"--port", "${port}"},
+          }
+        }
+      else
+        dap.adapters.codelldb = {
+          type = 'server',
+          port = "${port}",
+          executable = {
+            command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb",
+            args = {"--port", "${port}"},
+          }
+        }
+      end
+
+      -- Rust debug configurations
+      dap.configurations.rust = {
+        {
+          name = "Launch Rust Program (Debug)",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/target/debug/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          args = {},
+        },
+        {
+          name = "Launch Rust Program (Release)",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/target/release/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          args = {},
+        },
+        {
+          name = "Run Rust tests",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to test executable: ', vim.fn.getcwd() .. '/target/debug/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+          args = {},
+        },
+        {
+          name = "Attach to running Rust process",
+          type = "codelldb",
+          request = "attach",
+          pid = function()
+            return require("dap.utils").pick_process()
+          end,
+          cwd = '${workspaceFolder}',
+        },
+      }
     end,
   },
 }

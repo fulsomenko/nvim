@@ -1,4 +1,66 @@
 local M = {}
+
+-- Custom hover function with improved window sizing and scrolling
+local function custom_hover()
+  local client = vim.lsp.get_active_clients({ bufnr = 0 })[1]
+  if not client then return end
+
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+  return vim.lsp.buf_request(
+    0,
+    'textDocument/hover',
+    params,
+    function(err, result, ctx, _)
+      if err or not result then return end
+      local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
+      markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
+      if vim.tbl_isempty(markdown_lines) then return end
+
+      -- Create a buffer for the hover content
+      local hover_bufnr = vim.api.nvim_create_buf(false, true)
+      vim.api.nvim_buf_set_lines(hover_bufnr, 0, -1, false, markdown_lines)
+      vim.api.nvim_buf_set_option(hover_bufnr, 'filetype', 'markdown')
+      vim.api.nvim_buf_set_option(hover_bufnr, 'modifiable', false)
+      vim.api.nvim_buf_set_option(hover_bufnr, 'buflisted', false)
+
+      -- Calculate window dimensions
+      local width = math.min(100, vim.o.columns - 4)
+      local height = math.min(30, math.max(5, #markdown_lines + 2))
+
+      -- Create floating window
+      local win_id = vim.api.nvim_open_win(hover_bufnr, true, {
+        relative = 'cursor',
+        width = width,
+        height = height,
+        row = 1,
+        col = 1,
+        style = 'minimal',
+        border = 'rounded',
+      })
+
+      vim.api.nvim_win_set_option(win_id, 'wrap', true)
+      vim.api.nvim_win_set_option(win_id, 'scrollbind', false)
+
+      -- Close function that properly cleans up the window and buffer
+      local function close_hover()
+        if vim.api.nvim_win_is_valid(win_id) then
+          vim.api.nvim_win_close(win_id, true)
+        end
+        if vim.api.nvim_buf_is_valid(hover_bufnr) then
+          vim.api.nvim_buf_delete(hover_bufnr, { force = true })
+        end
+      end
+
+      -- Add keymaps for scrolling and closing
+      local opts = { buffer = hover_bufnr, noremap = true, silent = true }
+      vim.keymap.set('n', 'q', close_hover, opts)
+      vim.keymap.set('n', '<Esc>', close_hover, opts)
+      vim.keymap.set('n', '<C-d>', '<C-d>', opts)  -- Page down
+      vim.keymap.set('n', '<C-u>', '<C-u>', opts)  -- Page up
+    end
+  )
+end
+
 function M.on_attach(_, bufnr)
   -- we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
@@ -29,8 +91,12 @@ function M.on_attach(_, bufnr)
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
 
   -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+  -- Using custom hover with improved window sizing
+  nmap('K', custom_hover, 'Hover Documentation')
   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+
+  -- Jump to type definition (shows full type if it's in source)
+  nmap('<leader>D', vim.lsp.buf.type_definition, 'Jump to Type Definition')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')

@@ -26,10 +26,33 @@ require('lze').load {
           javascriptreact = { "prettierd", "prettier", stop_after_first = true },
           typescript = { "prettierd", "prettier", stop_after_first = true },
           typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+          zig = { "zigfmt" },
+          rust = { "rustfmt" },
+          r = { "styler" },
+          rmd = { "styler" },
+          qmd = { "styler" },
         },
         format_on_save = {
           timeout_ms = 500,
           lsp_format = "fallback",
+        },
+        formatters = {
+          zigfmt = {
+            command = "zig",
+            args = { "fmt", "--stdin" },
+            stdin = true,
+          },
+          styler = {
+            command = "R",
+            args = {
+              "--slave",
+              "--no-restore",
+              "--no-save",
+              "-e",
+              "con <- file('stdin'); styler::style_text(readLines(con)); close(con)",
+            },
+            stdin = true,
+          },
         },
       })
 

@@ -74,7 +74,18 @@ if nixCats('go') then
 end
 
 if nixCats('js') then
-  servers.ts_ls = {}
+  servers.ts_ls = {
+    settings = {
+      typescript = {
+        displayStringForProperties = true,
+        preferDisplayStringForProperties = true,
+      },
+      javascript = {
+        displayStringForProperties = true,
+        preferDisplayStringForProperties = true,
+      },
+    },
+  }
 end
 
 if nixCats('java') then
@@ -83,6 +94,62 @@ end
 
 if nixCats('csharp') then
   servers.omnisharp = {}
+end
+
+if nixCats('zig') then
+  servers.zls = {
+    settings = {
+      zls = {
+        enable_semantic_tokens = true,
+        enable_inlay_hints = true,
+        enable_snippets = true,
+        warn_style = true,
+        enable_autofix = false,
+      },
+    },
+    filetypes = { 'zig' },
+  }
+end
+
+if nixCats('rust') then
+  servers.rust_analyzer = {
+    settings = {
+      ["rust-analyzer"] = {
+        check = {
+          command = "clippy",
+        },
+        cargo = {
+          allFeatures = true,
+          loadOutDirsFromCheck = true,
+        },
+        procMacro = {
+          enable = true,
+        },
+        diagnostics = {
+          enable = true,
+          experimental = {
+            enable = true,
+          },
+        },
+      },
+    },
+    filetypes = { 'rust' },
+  }
+end
+
+if nixCats('r') then
+  servers.r_language_server = {
+    settings = {
+      r = {
+        lsp = {
+          debug = false,
+          diagnostics = true,
+          rich_documentation = true,
+        },
+      },
+    },
+    filetypes = { 'r', 'rmd', 'qmd' },
+  }
 end
 
 -- This is this flake's version of what kickstarter has set up for mason handlers.
