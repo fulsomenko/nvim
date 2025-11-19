@@ -86,7 +86,7 @@ function M.on_attach(_, bufnr)
     nmap('gI', function() require('telescope.builtin').lsp_implementations() end, '[G]oto [I]mplementation')
     nmap('<leader>ds', function() require('telescope.builtin').lsp_document_symbols() end, '[D]ocument [S]ymbols')
     nmap('<leader>ws', function() require('telescope.builtin').lsp_dynamic_workspace_symbols() end, '[W]orkspace [S]ymbols')
-  end -- TODO: someone who knows the builtin versions of these to do instead help me out please.
+  end -- Uses Telescope for symbol navigation; can be replaced with vim.lsp.buf equivalents if preferred
 
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
 

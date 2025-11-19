@@ -1,4 +1,38 @@
+# Nix
 /result
-/tags
-/.luarc.json
+/result-*
 .direnv
+.envrc.local
+
+# Neovim
+.swp
+.swo
+*.swp
+*.swo
+*~
+.nvimrc.lua
+.nvim.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+/.luarc.json
+.idea/
+*.iml
+.vscode/
+
+# Build artifacts
+/tags
+.cache/
+*.o
+*.a
+*.so
+
+# PQML/Mason
+mason/
+
+# Local configuration
+local/
+

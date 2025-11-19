@@ -1,3 +1,8 @@
+# Multi-language Neovim configuration with nixCats
+# Provides language-specific packages (jsvim, rustvim, rvim, zvim, jvim, sharpvim)
+# All packages share the config directory "mox-nvim" for consistency
+# To use separate config directories, override configDirName in package definitions
+
 # Copyright (c) 2023 BirdeeHub
 # Licensed under the MIT license
 

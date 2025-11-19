@@ -244,42 +244,6 @@ require('lze').load {
             skipFiles = { "<node_internals>/**", "node_modules/**", "**/webpack/**" },
           },
 
-          -- Specific configurations for your running services
-          {
-            name = "Attach to define (9233)",
-            type = "node",
-            request = "attach",
-            address = "localhost",
-            port = 9233,
-            localRoot = vim.fn.getcwd(),
-            remoteRoot = vim.fn.getcwd(),
-            sourceMaps = true,
-            skipFiles = { "<node_internals>/**", "node_modules/**" },
-          },
-
-          {
-            name = "Attach to viewer (9231)",
-            type = "node",
-            request = "attach",
-            address = "localhost",
-            port = 9231,
-            localRoot = vim.fn.getcwd(),
-            remoteRoot = vim.fn.getcwd(),
-            sourceMaps = true,
-            skipFiles = { "<node_internals>/**", "node_modules/**" },
-          },
-
-          {
-            name = "Attach to editor (9236)",
-            type = "node",
-            request = "attach",
-            address = "localhost",
-            port = 9236,
-            localRoot = vim.fn.getcwd(),
-            remoteRoot = vim.fn.getcwd(),
-            sourceMaps = true,
-            skipFiles = { "<node_internals>/**", "node_modules/**" },
-          },
         }
       end
     end,
