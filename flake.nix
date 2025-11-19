@@ -105,8 +105,19 @@
     # see :help nixCats.flake.outputs.categories
     # and
     # :help nixCats.flake.outputs.categoryDefinitions.scheme
-    categoryDefinitions = { pkgs, settings, categories, extra, name, mkNvimPlugin, ... }@packageDef: {
-      # to define and use a new category, simply add a new list to a set here, 
+    categoryDefinitions = { pkgs, settings, categories, extra, name, mkNvimPlugin, ... }@packageDef:
+    let
+      # Load language modules
+      langModules = {
+        javascript = import ./nix/languages/javascript.nix { inherit pkgs; };
+        java = import ./nix/languages/java.nix { inherit pkgs; };
+        csharp = import ./nix/languages/csharp.nix { inherit pkgs; };
+        rust = import ./nix/languages/rust.nix { inherit pkgs; };
+        zig = import ./nix/languages/zig.nix { inherit pkgs; };
+        r = import ./nix/languages/r.nix { inherit pkgs; };
+      };
+    in {
+      # to define and use a new category, simply add a new list to a set here,
       # and later, you will include categoryname = true; in the set you
       # provide when you build the package using this builder function.
       # see :help nixCats.flake.outputs.packageDefinitions for info on that section.
@@ -130,25 +141,19 @@
         debug = with pkgs; {
           csharp = [];
           go = [ delve ];
-          js = [ vscode-js-debug ];
+          js = langModules.javascript.debug;
           java = [];
-          zig = [ lldb ];
-          rust = [ vscode-extensions.vadimcn.vscode-lldb ];
+          zig = langModules.zig.debug;
+          rust = langModules.rust.debug;
           r = [];
-
         };
-        csharp = with pkgs; [ omnisharp-roslyn vimPlugins.omnisharp-extended-lsp-nvim ];
-        go = with pkgs; [
-          gopls
-          gotools
-          go-tools
-          gccgo
-        ];
-        js = with pkgs; [ typescript-language-server ];
-        java = with pkgs; [ jdt-language-server vimPlugins.nvim-jdtls ];
-        zig = with pkgs; [ zls ];
-        rust = with pkgs; [ rust-analyzer cargo clippy rustfmt ];
-        r = with pkgs; [ R rPackages.languageserver rPackages.styler rPackages.lintr ];
+        # Language-specific LSP and runtime dependencies (from modular language files)
+        js = langModules.javascript.lspsAndRuntimeDeps;
+        java = langModules.java.lspsAndRuntimeDeps;
+        csharp = langModules.csharp.lspsAndRuntimeDeps;
+        zig = langModules.zig.lspsAndRuntimeDeps;
+        rust = langModules.rust.lspsAndRuntimeDeps;
+        r = langModules.r.lspsAndRuntimeDeps;
         # and easily check if they are included in lua
         format = with pkgs; [
           prettierd
@@ -510,7 +515,17 @@
           };
         };
       };
-      nvim = { pkgs, ... }@misc: {
+      nvim = { pkgs, ... }@misc:
+      let
+        langModules = {
+          javascript = import ./nix/languages/javascript.nix { inherit pkgs; };
+          java = import ./nix/languages/java.nix { inherit pkgs; };
+          csharp = import ./nix/languages/csharp.nix { inherit pkgs; };
+          rust = import ./nix/languages/rust.nix { inherit pkgs; };
+          zig = import ./nix/languages/zig.nix { inherit pkgs; };
+          r = import ./nix/languages/r.nix { inherit pkgs; };
+        };
+      in {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
@@ -544,7 +559,7 @@
           # go = true; # <- disabled but you could enable it with override or module on install
           js = true;
 
-          # this does not have an associated category of plugins, 
+          # this does not have an associated category of plugins,
           # but lua can still check for it
           lspDebugMode = false;
           # you could also pass something else:
@@ -552,14 +567,7 @@
           themer = true;
           colorscheme = "onedark";
           appName = "jsvim";
-          logo = ''
-     ██╗ ███████╗ ██╗   ██╗██╗███╗   ███╗
-     ██║ ╚═══ ██║ ██║   ██║██║████╗ ████║
-     ██║ ███████║ ██║   ██║██║██╔████╔██║
-██   ██║ ██╔════╝ ╚██╗ ██╔╝██║██║╚██╔╝██║
-╚█████╔╝ ███████╗  ╚████╔╝ ██║██║ ╚═╝ ██║
- ╚════╝  ╚══════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
-  '';
+          logo = langModules.javascript.logo;
           js-debug-path = "${pkgs.vscode-js-debug.outPath}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
         };
         extra = {
@@ -572,12 +580,15 @@
         };
       };
 
-      jvim = { pkgs, ... }: {
+      jvim = { pkgs, ... }:
+      let
+        lang = import ./nix/languages/java.nix { inherit pkgs; };
+      in {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
           # The name of the package, and the default launch name,
-          # and the name of the .desktop file, is `nixCats`,
+          # and the name of the .desktop file, is `jvim`,
           # or, whatever you named the package definition in the packageDefinitions set.
           # WARNING: MAKE SURE THESE DONT CONFLICT WITH OTHER INSTALLED PACKAGES ON YOUR PATH
           # That would result in a failed build, as nixos and home manager modules validate for collisions on your path
@@ -600,28 +611,20 @@
             subtest1 = true;
           };
 
-          # enabling this category will enable the go category,
-          # and ALSO debug.go and debug.default due to our extraCats in categoryDefinitions.
-          # go = true; # <- disabled but you could enable it with override or module on install
+          # enabling this category will enable the java category,
+          # and ALSO debug.java and debug.default due to our extraCats in categoryDefinitions.
           java = true;
 
-          # this does not have an associated category of plugins, 
+          # this does not have an associated category of plugins,
           # but lua can still check for it
           lspDebugMode = false;
           # you could also pass something else:
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
-          appName = "jvim";
-          logo = ''
-     ██╗██╗   ██╗██╗███╗   ███╗
-     ██║██║   ██║██║████╗ ████║
-     ██║██║   ██║██║██╔████╔██║
-██   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
-╚█████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
- ╚════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
-  '';
-          ls-path = "${pkgs.jdt-language-server.outPath}/bin/jdtls";
+          appName = lang.appName;
+          logo = lang.logo;
+          ls-path = lang.ls-path;
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
@@ -633,12 +636,15 @@
         };
       };
 
-      sharpvim = { pkgs, ... }: {
+      sharpvim = { pkgs, ... }:
+      let
+        lang = import ./nix/languages/csharp.nix { inherit pkgs; };
+      in {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
           # The name of the package, and the default launch name,
-          # and the name of the .desktop file, is `nixCats`,
+          # and the name of the .desktop file, is `sharpvim`,
           # or, whatever you named the package definition in the packageDefinitions set.
           # WARNING: MAKE SURE THESE DONT CONFLICT WITH OTHER INSTALLED PACKAGES ON YOUR PATH
           # That would result in a failed build, as nixos and home manager modules validate for collisions on your path
@@ -661,9 +667,8 @@
             subtest1 = true;
           };
 
-          # enabling this category will enable the go category,
-          # and ALSO debug.go and debug.default due to our extraCats in categoryDefinitions.
-          # go = true; # <- disabled but you could enable it with override or module on install
+          # enabling this category will enable the csharp category,
+          # and ALSO debug.csharp and debug.default due to our extraCats in categoryDefinitions.
           csharp = true;
 
           # this does not have an associated category of plugins,
@@ -673,16 +678,9 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
-          appName = "sharpvim";
-          logo = ''
-███████╗██╗  ██╗ █████╗ ██╗   ██╗██████╗ ██╗   ██╗██╗███╗   ███╗
-██╔════╝██║  ██║██╔══██╗██║   ██║██╔══██╗██║   ██║██║████╗ ████║
-███████╗███████║███████║██║   ██║██████╔╝██║   ██║██║██╔████╔██║
-╚════██║██╔══██║██╔══██║╚██╗ ██╔╝██╔═══╝ ╚██╗ ██╔╝██║██║╚██╔╝██║
-███████║██║  ██║██║  ██║ ╚████╔╝ ██║      ╚████╔╝ ██║██║ ╚═╝ ██║
-╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝       ╚═══╝  ╚═╝╚═╝     ╚═╝
-  '';
-          ls-path = "${pkgs.omnisharp-roslyn.outPath}/bin/OmniSharp";
+          appName = lang.appName;
+          logo = lang.logo;
+          ls-path = lang.ls-path;
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
@@ -694,7 +692,10 @@
         };
       };
 
-      zvim = { pkgs, ... }: {
+      zvim = { pkgs, ... }:
+      let
+        lang = import ./nix/languages/zig.nix { inherit pkgs; };
+      in {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
@@ -733,16 +734,9 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
-          appName = "zvim";
-          logo = ''
-███████╗██╗   ██╗██╗███╗   ███╗
-╚══███╔╝██║   ██║██║████╗ ████║
-  ███╔╝ ██║   ██║██║██╔████╔██║
- ███╔╝  ╚██╗ ██╔╝██║██║╚██╔╝██║
-███████╗ ╚████╔╝ ██║██║ ╚═╝ ██║
-╚══════╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
-  '';
-          ls-path = "${pkgs.zls.outPath}/bin/zls";
+          appName = lang.appName;
+          logo = lang.logo;
+          ls-path = lang.ls-path;
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
@@ -754,7 +748,10 @@
         };
       };
 
-      rustvim = { pkgs, ... }: {
+      rustvim = { pkgs, ... }:
+      let
+        lang = import ./nix/languages/rust.nix { inherit pkgs; };
+      in {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
@@ -793,17 +790,10 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
-          appName = "rustvim";
-          logo = ''
-██████╗ ██╗   ██╗███████╗████████╗██╗   ██╗██╗███╗   ███╗
-██╔══██╗██║   ██║██╔════╝╚══██╔══╝██║   ██║██║████╗ ████║
-██████╔╝██║   ██║███████╗   ██║   ██║   ██║██║██╔████╔██║
-██╔══██╗██║   ██║╚════██║   ██║   ╚██╗ ██╔╝██║██║╚██╔╝██║
-██║  ██║╚██████╔╝███████║   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║
-╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝
-  '';
-          ls-path = "${pkgs.rust-analyzer.outPath}/bin/rust-analyzer";
-          codelldb-path = "${pkgs.vscode-extensions.vadimcn.vscode-lldb.outPath}/share/vscode/extensions/vadimcn.vscode-lldb-*/adapter/codelldb";
+          appName = lang.appName;
+          logo = lang.logo;
+          ls-path = lang.ls-path;
+          codelldb-path = lang.codelldb-path;
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
@@ -815,7 +805,10 @@
         };
       };
 
-      rvim = { pkgs, ... }: {
+      rvim = { pkgs, ... }:
+      let
+        lang = import ./nix/languages/r.nix { inherit pkgs; };
+      in {
         # these also recieve our pkgs variable
         # see :help nixCats.flake.outputs.packageDefinitions
         settings = {
@@ -854,15 +847,8 @@
           # see :help nixCats
           themer = true;
           colorscheme = "onedark";
-          appName = "rvim";
-          logo = ''
-██████╗ ██╗   ██╗██╗███╗   ███╗
-██╔══██╗██║   ██║██║████╗ ████║
-██████╔╝██║   ██║██║██╔████╔██║
-██╔══██╗╚██╗ ██╔╝██║██║╚██╔╝██║
-██║  ██║ ╚████╔╝ ██║██║ ╚═╝ ██║
-╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
-  '';
+          appName = lang.appName;
+          logo = lang.logo;
         };
         extra = {
           # to keep the categories table from being filled with non category things that you want to pass
