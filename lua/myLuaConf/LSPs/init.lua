@@ -200,16 +200,17 @@ require('lze').load {
     end,
     after = function(plugin)
       if require('nixCatsUtils').isNixCats then
+        -- Use native Neovim 0.11+ vim.lsp.config API instead of deprecated lspconfig.setup
         for server_name, cfg in pairs(servers) do
-          require('lspconfig')[server_name].setup({
-            capabilities = require('myLuaConf.LSPs.caps-on_attach').get_capabilities(server_name),
-            -- this line is interchangeable with the above LspAttach autocommand
-            -- on_attach = require('myLuaConf.LSPs.caps-on_attach').on_attach,
-            settings = (cfg or {}).settings,
-            filetypes = (cfg or {}).filetypes,
+          vim.lsp.config(server_name, {
             cmd = (cfg or {}).cmd,
-            root_pattern = (cfg or {}).root_pattern,
+            filetypes = (cfg or {}).filetypes,
+            root_markers = (cfg or {}).root_markers or { '.git' },
+            settings = (cfg or {}).settings,
+            capabilities = require('myLuaConf.LSPs.caps-on_attach').get_capabilities(server_name),
+            -- on_attach is handled by the LspAttach autocommand above (lines 183-189)
           })
+          vim.lsp.enable(server_name)
         end
       else
         require('mason').setup()
@@ -219,13 +220,15 @@ require('lze').load {
         }
         mason_lspconfig.setup_handlers {
           function(server_name)
-            require('lspconfig')[server_name].setup {
-              capabilities = require('myLuaConf.LSPs.caps-on_attach').get_capabilities(server_name),
-              -- this line is interchangeable with the above LspAttach autocommand
-              -- on_attach = require('myLuaConf.LSPs.caps-on_attach').on_attach,
-              settings = (servers[server_name] or {}).settings,
+            -- Use native Neovim 0.11+ vim.lsp.config API instead of deprecated lspconfig.setup
+            vim.lsp.config(server_name, {
               filetypes = (servers[server_name] or {}).filetypes,
-            }
+              root_markers = (servers[server_name] or {}).root_markers or { '.git' },
+              settings = (servers[server_name] or {}).settings,
+              capabilities = require('myLuaConf.LSPs.caps-on_attach').get_capabilities(server_name),
+              -- on_attach is handled by the LspAttach autocommand above (lines 183-189)
+            })
+            vim.lsp.enable(server_name)
           end,
         }
       end
