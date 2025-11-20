@@ -9,7 +9,9 @@
   ];
 
   # Debug adapter
-  debug = with pkgs; [ ];
+  debug = with pkgs; [
+    netcoredbg
+  ];
 
   # Code formatter
   formatter = with pkgs; [

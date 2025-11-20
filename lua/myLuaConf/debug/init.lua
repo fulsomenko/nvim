@@ -373,4 +373,69 @@ require('lze').load {
       }
     end,
   },
+  {
+    "nvim-dap",
+    for_cat = { cat = 'debug.csharp', default = false },
+    after = function(plugin)
+      local dap = require 'dap'
+
+      -- Configure CoreCLR (C#/.NET) debugging with netcoredbg
+      dap.adapters.coreclr = {
+        type = 'executable',
+        command = 'netcoredbg',
+        args = { '--interpreter=vscode' }
+      }
+
+      dap.configurations.cs = {
+        {
+          name = "Launch .NET Core App",
+          type = "coreclr",
+          request = "launch",
+          program = function()
+            return vim.fn.input('Path to DLL: ', vim.fn.getcwd() .. '/bin/Debug/net6.0/', 'file')
+          end,
+          cwd = '${workspaceFolder}',
+          stopOnEntry = false,
+        },
+        {
+          name = "Attach to .NET Process",
+          type = "coreclr",
+          request = "attach",
+          processId = function()
+            return require('dap.utils').pick_process()
+          end,
+        },
+      }
+    end,
+  },
+  {
+    "nvim-dap",
+    for_cat = { cat = 'debug.java', default = false },
+    after = function(plugin)
+      local dap = require 'dap'
+
+      -- Configure JDWP (Java Debug Wire Protocol) debugging
+      -- Start Java app with: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 YourApp.jar
+      dap.adapters.java = {
+        type = 'server',
+        host = '127.0.0.1',
+        port = 5005,
+        enrich_config = function(config, on_config)
+          -- Additional configuration can be added here
+          on_config(config)
+        end,
+      }
+
+      dap.configurations.java = {
+        {
+          name = "Attach to Java Process",
+          type = "java",
+          request = "attach",
+          hostName = '127.0.0.1',
+          port = 5005,
+          preLaunchTask = nil,
+        },
+      }
+    end,
+  },
 }
