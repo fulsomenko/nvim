@@ -33,15 +33,14 @@ nix develop  # or nix flake show to see available packages
 
 Each package provides a specialized Neovim configuration for a specific language ecosystem:
 
-| Package | Language | LSP | Debugger | Formatter | Use Case |
-|---------|----------|-----|----------|-----------|----------|
-| **jsvim** | JavaScript/TypeScript | ts_ls | vscode-js-debug | prettier | Frontend/Node.js development |
-| **jvim** | Java | jdtls | Built-in | - | Java application development |
-| **sharpvim** | C# | OmniSharp | - | - | .NET development |
+| Package | Language | LSPs | Debugger | Formatter / Linter | Use Case |
+|---------|----------|------|----------|--------------------|----------|
+| **jsvim** *(default)* | JavaScript / TypeScript | ts_ls, eslint, jsonls, cssls, html, tailwindcss, emmet, yamlls | vscode-js-debug | prettierd / eslint_d | Frontend / Node.js development |
+| **rustvim** | Rust | rust-analyzer | CodeLLDB | rustfmt / clippy | Rust development |
 | **zvim** | Zig | zls | LLDB | zig fmt | Zig systems programming |
-| **rustvim** | Rust | rust-analyzer | CodeLLDB | rustfmt | Rust development with clippy linting |
-| **rvim** | R | languageserver | - | styler | R statistical analysis & data science |
-| **nvim** | General | TypeScript-focused | Multi-lang | prettier | Default multi-language setup |
+| **jvim** | Java | jdtls | (JDWP attach) | google-java-format | JVM development |
+| **sharpvim** | C# | omnisharp | netcoredbg | csharpier | .NET development |
+| **rvim** | R | r_language_server | - | styler / lintr | R statistical analysis |
 
 ### Using Language-Specific Packages
 
@@ -95,16 +94,38 @@ nvim/
 
 ## Key Features by Package
 
-### JavaScript/TypeScript (jsvim)
+### JavaScript / TypeScript (`jsvim`) — default package
 
-- **LSP**: TypeScript Language Server with full TypeScript/JavaScript support
-- **Debugging**: vscode-js-debug with launch/attach configurations
-- **Formatting**: Prettier/Prettierd for consistent code style
-- **Features**:
-  - Node.js ESM and CommonJS debugging
-  - Chrome/Browser debugging
-  - Jest test debugging
-  - Process attachment capabilities
+- **LSPs**:
+  - `ts_ls` (typescript-language-server) with inlay hints,
+    `implementations` and `references` code lenses
+  - `eslint` (vscode-eslint-language-server) with `codeActionOnSave`
+  - `jsonls` + `yamlls` driven by `SchemaStore.nvim`
+  - `cssls`, `html`, `tailwindcss`, `emmet_language_server`
+- **Debugging**: vscode-js-debug, run as a server-mode adapter shared by
+  every `pwa-*` config:
+  - Launch current file with `node` or `tsx`
+  - Launch via `npm` script (interactive picker reads `package.json`)
+  - Debug Jest test (current file) via `node_modules/.bin/jest`
+  - Debug Vitest test (current file)
+  - Attach to Node by default port (9229), custom port, or PID picker
+  - Attach to / launch Chrome
+- **Formatting**: `prettierd` (with `prettier` fallback) for js, ts, jsx,
+  tsx, json, jsonc, html, css, scss, less, yaml, markdown, graphql, vue,
+  svelte. Run on save via `conform.nvim`, manual via `<leader>FF`.
+- **Linting**: `eslint_d` via `nvim-lint` on `BufWritePost` /
+  `BufReadPost` / `InsertLeave`.
+- **Tests**: `neotest` with `neotest-jest` and `neotest-vitest`:
+  `<leader>tn` (nearest), `<leader>tf` (file), `<leader>ts` (summary),
+  `<leader>to` (output), `<leader>tw` (watch).
+- **Imports** (`<leader>oi` / `ia` / `ir` / `if`): organize, add missing,
+  remove unused, fix all — uses typed code-action kinds.
+- **package.json** UX (`<leader>n*`): inline npm version info, update,
+  delete, install via `package-info.nvim`.
+- **JSX**: `nvim-ts-autotag` (auto-close tags) and
+  `nvim-ts-context-commentstring` (correct comment tokens inside JSX).
+- **Health check**: `:checkhealth jsvim` reports tooling availability and
+  attached LSP clients.
 
 ### Rust (rustvim)
 
@@ -196,10 +217,10 @@ Press `<leader>FF` to manually format the current file.
 
 ### Linting
 
-Code quality checks run on buffer write:
-- JavaScript/TypeScript: ESLint (commented, can enable)
-- Rust: Clippy (integrated with rust-analyzer)
-- R: lintr
+Code quality checks run on buffer write / read / insert-leave:
+- JavaScript / TypeScript: `eslint_d` (via `nvim-lint`)
+- Rust: clippy (integrated via rust-analyzer's `check.command`)
+- R: `lintr`
 
 ## Customization
 
@@ -218,27 +239,23 @@ Edit `lua/myLuaConf/opts_and_keys.lua` to customize:
 
 ### Creating a Custom Package
 
-Edit flake.nix and add a new package definition:
+Every language package is built with the `mkLanguagePackage` helper in
+`nix/lib.nix`. To add a new language `foo`:
+
+1. Create `nix/languages/foo.nix` declaring `lspsAndRuntimeDeps`,
+   `formatters`, `linters`, `lspName`, `packageName`, `appName`, `logo`.
+2. Add it to the `languageModules` set in `nix/lib.nix`.
+3. Add a one-liner output in `flake.nix`:
 
 ```nix
-customvim = { pkgs, ... }: {
-  settings = {
-    configDirName = "nvim";
-    wrapRc = true;
-  };
-  categories = {
-    markdown = true;
-    general = true;
-    rust = true;  # Your desired language
-    # ... other categories
-  };
-};
+foovim = moxLib.mkLanguagePackage { language = "foo"; };
 ```
 
-Then build it:
-```bash
-nix build .#customvim
-```
+4. Optionally extend `lua/myLuaConf/LSPs/init.lua` with an
+   `if nixCats('foo') then servers.foo_ls = { ... } end` block.
+
+The lua side reads formatters/linters automatically from the merged
+language tables passed via `nixCats.extra("languageConfig.*")`.
 
 ## Architecture
 

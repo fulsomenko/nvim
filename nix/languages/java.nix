@@ -1,29 +1,27 @@
-# Java language configuration for jvim
+## Java language module for jvim.
 { pkgs }:
 
 {
-  # LSP server and runtime dependencies
   lspsAndRuntimeDeps = with pkgs; [
     jdt-language-server
+    google-java-format
     vimPlugins.nvim-jdtls
   ];
 
-  # Debug adapter
   debug = with pkgs; [ ];
 
-  # Code formatter
-  formatter = with pkgs; [
-    google-java-format
-  ];
+  formatters = {
+    java = [ "google-java-format" ];
+  };
 
-  # Linter
-  linter = "checkstyle";
+  linters = {};
 
-  # Package naming
+  treesitter = [ "java" ];
+
   packageName = "jvim";
-  appName = "jvim";
+  appName     = "jvim";
+  lspName     = "jdtls";
 
-  # ASCII art logo
   logo = ''
     ██╗██╗   ██╗██╗███╗   ███╗
     ██║██║   ██║██║████╗ ████║
@@ -33,9 +31,5 @@
  ╚════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
   '';
 
-  # LSP server name (as used in lspconfig)
-  lspName = "jdtls";
-
-  # Additional paths for jvim
   ls-path = "${pkgs.jdt-language-server.outPath}/bin/jdtls";
 }

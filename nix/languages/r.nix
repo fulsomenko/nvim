@@ -1,8 +1,7 @@
-# R language configuration for rvim
+## R language module for rvim.
 { pkgs }:
 
 {
-  # LSP server and runtime dependencies
   lspsAndRuntimeDeps = with pkgs; [
     R
     rPackages.languageserver
@@ -10,22 +9,27 @@
     rPackages.lintr
   ];
 
-  # Debug adapter
   debug = with pkgs; [ ];
 
-  # Code formatter
-  formatter = with pkgs; [
-    # R formatter (styler is configured via R command in Lua config)
-  ];
+  ## styler is invoked through R via a shim formatter defined in
+  ## lua/myLuaConf/format/init.lua's `formatters = { styler = ... }`.
+  formatters = {
+    r   = [ "styler" ];
+    rmd = [ "styler" ];
+    qmd = [ "styler" ];
+  };
 
-  # Linter
-  linter = "lintr";
+  linters = {
+    r   = [ "lintr" ];
+    rmd = [ "lintr" ];
+  };
 
-  # Package naming
+  treesitter = [ "r" ];
+
   packageName = "rvim";
-  appName = "rvim";
+  appName     = "rvim";
+  lspName     = "r_language_server";
 
-  # ASCII art logo
   logo = ''
 ██████╗ ██╗   ██╗██╗███╗   ███╗
 ██╔══██╗██║   ██║██║████╗ ████║
@@ -34,7 +38,4 @@
 ██║  ██║ ╚████╔╝ ██║██║ ╚═╝ ██║
 ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
   '';
-
-  # LSP server name (as used in lspconfig)
-  lspName = "r_language_server";
 }

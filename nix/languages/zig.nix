@@ -1,30 +1,28 @@
-# Zig language configuration for zvim
+## Zig language module for zvim.
 { pkgs }:
 
 {
-  # LSP server and runtime dependencies
   lspsAndRuntimeDeps = with pkgs; [
     zls
+    zig
   ];
 
-  # Debug adapter
   debug = with pkgs; [
     lldb
   ];
 
-  # Code formatter
-  formatter = with pkgs; [
-    # Zig's formatter is built-in (zig fmt)
-  ];
+  formatters = {
+    zig = [ "zigfmt" ];
+  };
 
-  # Linter
-  linter = "";
+  linters = {};
 
-  # Package naming
+  treesitter = [ "zig" ];
+
   packageName = "zvim";
-  appName = "zvim";
+  appName     = "zvim";
+  lspName     = "zls";
 
-  # ASCII art logo
   logo = ''
 ███████╗██╗   ██╗██╗███╗   ███╗
 ╚══███╔╝██║   ██║██║████╗ ████║
@@ -34,9 +32,5 @@
 ╚══════╝  ╚═══╝  ╚═╝╚═╝     ╚═╝
   '';
 
-  # LSP server name (as used in lspconfig)
-  lspName = "zls";
-
-  # Additional paths for zvim
   ls-path = "${pkgs.zls.outPath}/bin/zls";
 }

@@ -336,23 +336,19 @@ nvim analysis.R
 
 ---
 
-## General Package (nvim)
+## Default package (`jsvim`)
 
-**Best for**: Multi-language development with all features enabled
-
-The `nvim` package includes:
-- All language support (JavaScript, Java, C#, Rust, Zig, R)
-- All plugins and features
-- Telescope fuzzy finder
-- Oil file manager
-- Treesitter for all supported languages
-- DAP debugging for all languages
-- Formatting and linting for all languages
+The default flake output is `jsvim` — a JavaScript / TypeScript-focused
+package. There is no separate "general" package any more; if you want
+multi-language support, build (or compose) your own with
+`mkLanguagePackage` (see `nix/lib.nix`) or simply enable additional
+language categories on top of `jsvim` via `extraCategories`.
 
 **Quick Start**:
 
 ```bash
-nix run .#nvim
+nix run .          # same as `nix run .#jsvim`
+nix run .#jsvim
 ```
 
 ---

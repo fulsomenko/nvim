@@ -1,8 +1,7 @@
-# Rust language configuration for rustvim
+## Rust language module for rustvim.
 { pkgs }:
 
 {
-  # LSP server and runtime dependencies
   lspsAndRuntimeDeps = with pkgs; [
     rust-analyzer
     cargo
@@ -10,24 +9,24 @@
     rustfmt
   ];
 
-  # Debug adapter
   debug = with pkgs; [
     vscode-extensions.vadimcn.vscode-lldb
   ];
 
-  # Code formatter
-  formatter = with pkgs; [
-    rustfmt
-  ];
+  formatters = {
+    rust = [ "rustfmt" ];
+  };
 
-  # Linter
-  linter = "clippy";
+  ## clippy diagnostics come via rust-analyzer's `check.command = "clippy"`,
+  ## so we don't run a separate nvim-lint linter for rust.
+  linters = {};
 
-  # Package naming
+  treesitter = [ "rust" ];
+
   packageName = "rustvim";
-  appName = "rustvim";
+  appName     = "rustvim";
+  lspName     = "rust_analyzer";
 
-  # ASCII art logo
   logo = ''
 ██████╗ ██╗   ██╗███████╗████████╗██╗   ██╗██╗███╗   ███╗
 ██╔══██╗██║   ██║██╔════╝╚══██╔══╝██║   ██║██║████╗ ████║
@@ -37,10 +36,6 @@
 ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝
   '';
 
-  # LSP server name (as used in lspconfig)
-  lspName = "rust_analyzer";
-
-  # Additional paths for rustvim
-  ls-path = "${pkgs.rust-analyzer.outPath}/bin/rust-analyzer";
+  ls-path       = "${pkgs.rust-analyzer.outPath}/bin/rust-analyzer";
   codelldb-path = "${pkgs.vscode-extensions.vadimcn.vscode-lldb.outPath}/share/vscode/extensions/vadimcn.vscode-lldb-*/adapter/codelldb";
 }

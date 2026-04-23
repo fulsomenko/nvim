@@ -71,7 +71,34 @@ require('lze').load {
   { import = "myLuaConf.plugins.snacks", },
   { import = "myLuaConf.plugins.ollama", },
   { import = "myLuaConf.plugins.nerdtree", },
+  { import = "myLuaConf.plugins.javascript", },
   -- { import = "myLuaConf.plugins.claude-code", },
+
+  {
+    "nvim-autopairs",
+    for_cat = 'general.always',
+    event = "InsertEnter",
+    after = function(_)
+      local ap = require('nvim-autopairs')
+      ap.setup({
+        check_ts = true,
+        ts_config = {
+          lua = { 'string', 'source' },
+          javascript = { 'string', 'template_string' },
+          typescript = { 'string', 'template_string' },
+        },
+        disable_filetype = { 'TelescopePrompt', 'spectre_panel' },
+      })
+      ---Hook into nvim-cmp confirm so '(' is auto-completed for functions.
+      local ok_cmp, cmp = pcall(require, 'cmp')
+      if ok_cmp then
+        local ok_ext, ext = pcall(require, 'nvim-autopairs.completion.cmp')
+        if ok_ext then
+          cmp.event:on('confirm_done', ext.on_confirm_done())
+        end
+      end
+    end,
+  },
 
   {
     "claude-code.nvim",
@@ -81,6 +108,8 @@ require('lze').load {
       {"<leader>cc", "<cmd>ClaudeCode<CR>", mode = {"n"}, noremap = true, desc = "Open Claude Code"},
     },
     after = function(plugin)
+      ---NOTE: <C-,> isn't transmitted by most terminals (kitty/iterm/alacritty
+      ---without csi-u). We use <leader>cc to open and <leader>ct to toggle.
       require("claude-code").setup({
         -- Terminal window settings
         window = {
@@ -131,8 +160,8 @@ require('lze').load {
         -- Keymaps
         keymaps = {
           toggle = {
-            normal = "<C-,>",       -- Normal mode keymap for toggling Claude Code, false to disable
-            terminal = "<C-,>",     -- Terminal mode keymap for toggling Claude Code, false to disable
+            normal = "<leader>ct",   -- terminal-safe alternative to <C-,>
+            terminal = "<leader>ct",
             variants = {
               continue = "<leader>cC", -- Normal mode keymap for Claude Code with continue flag
               verbose = "<leader>cV",  -- Normal mode keymap for Claude Code with verbose flag

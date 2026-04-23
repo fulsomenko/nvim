@@ -67,9 +67,13 @@ nix run .#zvim
 # R
 nix run .#rvim
 
-# General Neovim (all features)
-nix run .#nvim
+# Default (same as `.#jsvim`)
+nix run .
 ```
+
+> Note: the default flake output is `jsvim` (renamed from the old `nvim`
+> output). The on-PATH binary is still called `nvim` (and `vim`) via
+> package aliases.
 
 ### Step 5: Build a Package
 
@@ -82,7 +86,7 @@ nix build .#jsvim
 This creates a `result` symlink with the built package. Run it with:
 
 ```bash
-./result/bin/nvim
+./result/bin/jsvim   # or `./result/bin/nvim` / `./result/bin/vim`
 ```
 
 ## Installation Without Nix

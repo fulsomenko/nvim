@@ -1,125 +1,93 @@
+---Import-management helpers, mostly for ts_ls / gopls / jdtls.
+---
+---For ts_ls we prefer the typed code-action kinds shipped by the server
+---(`source.organizeImports.ts`, `source.removeUnused.ts`,
+---`source.addMissingImports.ts`) and only fall back to the raw command
+---name as a safety net.
 local M = {}
 
--- Function to organize/fix imports
-function M.fix_imports()
-  local clients = vim.lsp.get_clients({ bufnr = 0 })
-
-  for _, client in pairs(clients) do
-    if client.name == "ts_ls" or client.name == "tsserver" then
-      -- TypeScript/JavaScript
-      local params = {
-        command = "_typescript.organizeImports",
-        arguments = { vim.api.nvim_buf_get_name(0) },
-      }
-      -- Use the new client:exec_cmd method if available, fallback to execute_command
-      if client.exec_cmd then
-        client:exec_cmd(params)
-      else
-        vim.lsp.buf.execute_command(params)
-      end
-      return
-    elseif client.name == "gopls" then
-      -- Go
-      vim.lsp.buf.code_action({
-        filter = function(action)
-          return action.kind and action.kind:match("source.organizeImports")
-        end,
-        apply = true,
-      })
-      return
-    elseif client.name == "jdtls" then
-      -- Java
-      vim.lsp.buf.code_action({
-        filter = function(action)
-          return action.kind and action.kind:match("source.organizeImports")
-        end,
-        apply = true,
-      })
-      return
-    end
-  end
-
-  -- Fallback to generic code action approach
-  local params = vim.lsp.util.make_range_params()
-  params.context = {
-    only = { "source.organizeImports" },
-    diagnostics = {},
-  }
-
-  local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1000)
-  if not result or vim.tbl_isempty(result) then
-    print("No organize imports action available")
-    return
-  end
-
-  for _, res in pairs(result) do
-    if res.result then
-      for _, action in pairs(res.result) do
-        if action.edit then
-          vim.lsp.util.apply_workspace_edit(action.edit, "utf-8")
-        elseif action.command then
-          -- Use the newer client method if available
-          local active_clients = vim.lsp.get_clients({ bufnr = 0 })
-          if active_clients[1] and active_clients[1].exec_cmd then
-            active_clients[1]:exec_cmd(action.command)
-          else
-            vim.lsp.buf.execute_command(action.command)
-          end
+---Apply the first code action whose kind matches one of `kinds`.
+local function apply_code_action(kinds)
+  vim.lsp.buf.code_action({
+    apply  = true,
+    filter = function(action)
+      if not action.kind then return false end
+      for _, k in ipairs(kinds) do
+        if action.kind == k or action.kind:match('^' .. vim.pesc(k)) then
+          return true
         end
       end
+      return false
+    end,
+  })
+end
+
+---Return the first attached LSP client whose name matches one of `names`.
+local function find_client(names)
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+    for _, n in ipairs(names) do
+      if client.name == n then return client end
     end
   end
+  return nil
 end
 
--- Function to add missing imports (where supported)
+function M.organize_imports()
+  if find_client({ 'ts_ls', 'tsserver', 'typescript-tools' }) then
+    apply_code_action({ 'source.organizeImports.ts', 'source.organizeImports' })
+    return
+  end
+  if find_client({ 'gopls' }) then
+    apply_code_action({ 'source.organizeImports' })
+    return
+  end
+  if find_client({ 'jdtls' }) then
+    apply_code_action({ 'source.organizeImports' })
+    return
+  end
+  apply_code_action({ 'source.organizeImports' })
+end
+
 function M.add_missing_imports()
-  vim.lsp.buf.code_action({
-    filter = function(action)
-      return action.kind and (
-        action.kind:match("source.addMissingImports") or
-        action.kind:match("quickfix")
-      )
-    end,
-    apply = true,
-  })
+  if find_client({ 'ts_ls', 'tsserver', 'typescript-tools' }) then
+    apply_code_action({ 'source.addMissingImports.ts', 'source.addMissingImports', 'quickfix' })
+    return
+  end
+  apply_code_action({ 'source.addMissingImports', 'quickfix' })
 end
 
--- Function to remove unused imports
 function M.remove_unused_imports()
-  vim.lsp.buf.code_action({
-    filter = function(action)
-      return action.kind and action.kind:match("source.removeUnused")
-    end,
-    apply = true,
-  })
+  if find_client({ 'ts_ls', 'tsserver', 'typescript-tools' }) then
+    apply_code_action({ 'source.removeUnused.ts', 'source.removeUnused' })
+    return
+  end
+  apply_code_action({ 'source.removeUnused' })
 end
 
--- Function to fix all import issues
+---Run add-missing -> remove-unused -> organize, with small delays so each
+---batch of edits settles before the next request goes out.
 function M.fix_all_imports()
   M.add_missing_imports()
   vim.defer_fn(function()
     M.remove_unused_imports()
-    vim.defer_fn(function()
-      M.fix_imports()
-    end, 100)
+    vim.defer_fn(M.organize_imports, 100)
   end, 100)
 end
 
 function M.setup_keybindings(bufnr)
   local opts = { buffer = bufnr, silent = true }
 
-  vim.keymap.set('n', '<leader>oi', M.fix_imports,
-    vim.tbl_extend('force', opts, { desc = 'Organize/Fix Imports' }))
-
+  vim.keymap.set('n', '<leader>oi', M.organize_imports,
+    vim.tbl_extend('force', opts, { desc = 'Organize / Fix Imports' }))
   vim.keymap.set('n', '<leader>ia', M.add_missing_imports,
     vim.tbl_extend('force', opts, { desc = 'Add Missing Imports' }))
-
   vim.keymap.set('n', '<leader>ir', M.remove_unused_imports,
     vim.tbl_extend('force', opts, { desc = 'Remove Unused Imports' }))
-
   vim.keymap.set('n', '<leader>if', M.fix_all_imports,
     vim.tbl_extend('force', opts, { desc = 'Fix All Import Issues' }))
 end
 
-return M
+---Backwards-compatible alias; older config called this `fix_imports`.
+M.fix_imports = M.organize_imports
 
+return M

@@ -32,39 +32,46 @@ Before starting, gather information about your language's development tools:
 
 ### Step 2: Create the Language Module
 
-Create a new file `nix/languages/mylang.nix`:
+Create a new file `nix/languages/mylang.nix`. The module is the SINGLE
+SOURCE OF TRUTH for the language: its formatter / linter tables are
+read straight into conform.nvim and nvim-lint at startup, so you
+should never have to edit those lua files for a new language.
 
 ```nix
-# Zig language configuration
 { pkgs }:
 
 {
-  # LSP server and runtime dependencies
+  ## Tools available on PATH inside the wrapped Neovim.
+  ## LSPs, formatters, linters AND the runtime they need (e.g. node) all
+  ## go here.
   lspsAndRuntimeDeps = with pkgs; [
     my-language-server
-    # Add any required build tools
+    my-formatter
+    my-linter
     my-build-tool
   ];
 
-  # Debug adapter (leave empty [] if not available)
-  debug = with pkgs; [
-    my-debugger
-    # or: debug = [];
-  ];
+  ## Debug adapters. Empty list if none.
+  debug = with pkgs; [ my-debugger ];
 
-  # Code formatter
-  formatter = with pkgs; [
-    my-formatter
-  ];
+  ## conform.nvim formatters_by_ft contributions for this language.
+  ## The lua side merges every language's formatters into a single table.
+  formatters = {
+    mylang = [ "my-formatter" ];
+  };
 
-  # Linter name (optional)
-  linter = "my-linter";
+  ## nvim-lint linters_by_ft contributions.
+  linters = {
+    mylang = [ "my-linter" ];
+  };
 
-  # Package naming
+  ## Treesitter parsers (informational; the package uses withAllGrammars).
+  treesitter = [ "mylang" ];
+
   packageName = "mylangvim";
-  appName = "mylangvim";
+  appName     = "mylangvim";
+  lspName     = "my_language_server";
 
-  # ASCII art logo (6 lines recommended, consistent with other logos)
   logo = ''
     ███╗   ███╗██╗   ██╗██╗      █████╗ ███╗   ██╗ ██████╗
     ████╗ ████║╚██╗ ██╔╝██║     ██╔══██╗████╗  ██║██╔════╝
@@ -73,9 +80,6 @@ Create a new file `nix/languages/mylang.nix`:
     ██║ ╚═╝ ██║   ██║   ███████╗██║  ██║██║ ╚████║╚██████╔╝
     ╚═╝     ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝
   '';
-
-  # LSP server name (as used in lspconfig)
-  lspName = "my_language_server";
 }
 ```
 
@@ -84,46 +88,47 @@ Create a new file `nix/languages/mylang.nix`:
 - Ensure all packages exist in nixpkgs (use `nix search nixpkgs my-formatter`)
 - For debuggers, prioritize standard ones: LLDB, GDB, or language-specific adapters
 
-### Step 3: Update flake.nix
+### Step 3: Register the module and create the package output
 
-Add your language to the language definitions in `flake.nix`:
+Two small edits.
 
-#### In `categoryDefinitions`:
-
-```nix
-mylang = (import ./nix/languages/mylang.nix { inherit pkgs; }).lspsAndRuntimeDeps;
-```
-
-#### In `debugPkgs`:
+#### a) `nix/lib.nix` — add to `languageModules`:
 
 ```nix
-mylang = (import ./nix/languages/mylang.nix { inherit pkgs; }).debug;
-```
-
-#### In `extraCats`:
-
-```nix
-mylang = [
-  [ "debug" "mylang" ]
-];
-```
-
-#### Create the package definition (use `mkLanguagePackage`):
-
-```nix
-mylangvim = nixpkgs.legacyPackages.${system}.callPackage ./nixCatsBuilder.nix {
-  system = system;
-  categories = {
-    general = true;
-    LSPs = true;
-    mylang = true;
-    debug = (!(builtins.elem system disabledSystems));
-    format = true;
-    lint = true;
-  };
-  categoryDefinitions = categoryDefinitions;
+languageModules = pkgs: {
+  ## ... existing entries ...
+  mylang = import ./languages/mylang.nix { inherit pkgs; };
 };
 ```
+
+#### b) `flake.nix` — wire the runtime deps and add the output:
+
+In `categoryDefinitions.lspsAndRuntimeDeps`:
+
+```nix
+mylang = langs.mylang.lspsAndRuntimeDeps;
+```
+
+In `categoryDefinitions.lspsAndRuntimeDeps.debug`:
+
+```nix
+mylang = langs.mylang.debug;
+```
+
+In `categoryDefinitions.extraCats` (only if your language has a debug
+adapter):
+
+```nix
+mylang = [ [ "debug" "mylang" ] ];
+```
+
+In `packageDefinitions`:
+
+```nix
+mylangvim = moxLib.mkLanguagePackage { language = "mylang"; };
+```
+
+That's it for nix — no further edits to format/lint lua files needed.
 
 ### Step 4: Configure LSP
 
@@ -215,62 +220,24 @@ If a debugger is available, edit `lua/myLuaConf/debug/init.lua`:
 - `server`: Debug adapter running as a server
 - `pipe`: Communication via named pipes
 
-### Step 6: Configure Formatting
+### Step 6: Formatting (auto-wired)
 
-Edit `lua/myLuaConf/format/init.lua` and add to `formatters_by_ft`:
+Nothing to do in lua. The `formatters` table you declared in
+`nix/languages/mylang.nix` is merged into conform.nvim's
+`formatters_by_ft` automatically via
+`nixCats.extra("languageConfig.formatters")`.
 
-```lua
-mylang = { "my-formatter" },
-```
+If your formatter needs special invocation (e.g. running through a
+runtime like `R --slave -e ...`), add a custom formatter definition to
+the `formatters = { ... }` block in `lua/myLuaConf/format/init.lua` (see
+the existing `styler` and `zigfmt` entries).
 
-If your formatter needs special configuration, add to the `formatters` table:
+### Step 7: Linting (auto-wired)
 
-```lua
-my_formatter = {
-  command = "my-formatter",
-  args = { "--option", "value", "--stdin" },
-  stdin = true,
-},
-```
-
-**Common Patterns**:
-
-```lua
--- Simple formatter
-rust = { "rustfmt" },
-
--- Formatter with options
-go = {
-  "gofmt",
-  extra_args = { "-w" },
-},
-
--- Multiple formatters (priority order)
-javascript = { "prettier", "eslint_d" },
-```
-
-### Step 7: Configure Linting (Optional)
-
-Edit `lua/myLuaConf/lint/init.lua` and add:
-
-```lua
-mylang = { 'my-linter' },
-```
-
-If you need custom linter configuration:
-
-```lua
-linters.my_linter = {
-  cmd = 'my-linter',
-  stdin = false,
-  args = { '--config', '.my-linter-rc' },
-  stream = 'stdout',
-  ignore_exitcode = false,
-  parser = require('lint.parser').from_errorformat('%f:%l:%c: %m'),
-}
-
-mylang = { 'my-linter' },
-```
+Same story: the `linters` table you declared in your language module is
+the source of truth. nvim-lint reads it via
+`nixCats.extra("languageConfig.linters")` and runs on `BufWritePost` /
+`BufReadPost` / `InsertLeave`.
 
 ### Step 8: Test Your Configuration
 
