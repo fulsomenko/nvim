@@ -94,8 +94,10 @@ require('lze').load {
 
   ----------------------------------------------------------------- js / ts ---
   {
-    'nvim-dap',
+    'nvim-dap-js-config',
     for_cat   = { cat = 'debug.js', default = false },
+    on_plugin = { 'nvim-dap' },
+    load      = function(_) end,
     after     = function(_plugin)
       local dap = require('dap')
 
@@ -267,8 +269,10 @@ require('lze').load {
 
   ----------------------------------------------------------------- zig -------
   {
-    'nvim-dap',
+    'nvim-dap-zig-config',
     for_cat = { cat = 'debug.zig', default = false },
+    on_plugin = { 'nvim-dap' },
+    load = function(_) end,
     after = function(_plugin)
       local dap = require('dap')
       dap.adapters.lldb = { type = 'executable', command = 'lldb-vscode', name = 'lldb' }
@@ -301,8 +305,10 @@ require('lze').load {
 
   ----------------------------------------------------------------- rust ------
   {
-    'nvim-dap',
+    'nvim-dap-rust-config',
     for_cat = { cat = 'debug.rust', default = false },
+    on_plugin = { 'nvim-dap' },
+    load = function(_) end,
     after = function(_plugin)
       local dap = require('dap')
       local codelldb_path = (require('nixCatsUtils').isNixCats and (nixCats('codelldb-path') or 'codelldb'))
@@ -344,8 +350,10 @@ require('lze').load {
 
   ----------------------------------------------------------------- csharp ----
   {
-    'nvim-dap',
+    'nvim-dap-csharp-config',
     for_cat = { cat = 'debug.csharp', default = false },
+    on_plugin = { 'nvim-dap' },
+    load = function(_) end,
     after = function(_plugin)
       local dap = require('dap')
       dap.adapters.coreclr = {
@@ -369,8 +377,10 @@ require('lze').load {
 
   ----------------------------------------------------------------- java ------
   {
-    'nvim-dap',
+    'nvim-dap-java-config',
     for_cat = { cat = 'debug.java', default = false },
+    on_plugin = { 'nvim-dap' },
+    load = function(_) end,
     after = function(_plugin)
       local dap = require('dap')
       dap.adapters.java = {
