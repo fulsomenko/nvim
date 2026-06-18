@@ -251,6 +251,42 @@ require('lze').load {
     end,
   },
   {
+    "flash.nvim",
+    for_cat = 'general.always',
+    -- Load eagerly (after UI) so the f/t/F/T enhancements are live everywhere,
+    -- not just after the first jump. flash.setup() does NOT create keymaps, so
+    -- we define them ourselves below.
+    event = "DeferredUIEnter",
+    after = function(_)
+      local flash = require('flash')
+      flash.setup({
+        modes = {
+          -- Enhance f/t/F/T and ;/, to jump across lines and stay repeatable.
+          char = { enabled = true },
+          -- Leave a plain `/` search untouched; opt into labels via <C-s> below.
+          search = { enabled = false },
+        },
+      })
+
+      -- Vimium-style jump: trigger, type 1-2 chars of the target, press a label.
+      vim.keymap.set({ 'n', 'x', 'o' }, 's', function() flash.jump() end,
+        { desc = 'Flash jump' })
+      -- Treesitter node jump/select. Normal + operator-pending only; visual `S`
+      -- stays bound to nvim-surround.
+      vim.keymap.set({ 'n', 'o' }, 'S', function() flash.treesitter() end,
+        { desc = 'Flash Treesitter' })
+      -- Operator-pending remote jump, e.g. `yr` + label to yank from elsewhere.
+      vim.keymap.set('o', 'r', function() flash.remote() end,
+        { desc = 'Flash remote' })
+      -- Extend/refine a Treesitter search selection.
+      vim.keymap.set({ 'o', 'x' }, 'R', function() flash.treesitter_search() end,
+        { desc = 'Flash Treesitter search' })
+      -- Toggle Flash labels while typing a normal `/` search.
+      vim.keymap.set('c', '<C-s>', function() flash.toggle() end,
+        { desc = 'Toggle Flash search' })
+    end,
+  },
+  {
     "vim-startuptime",
     for_cat = 'general.extra',
     cmd = { "StartupTime" },

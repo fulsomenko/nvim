@@ -178,6 +178,7 @@
             nvim-surround
             nvim-spectre
             nvim-autopairs
+            flash-nvim
           ];
           extra = with pkgs.vimPlugins; [
             fidget-nvim
