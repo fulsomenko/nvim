@@ -64,7 +64,11 @@ return {
             enabled = function()
               return require('snacks').git.get_root() ~= nil
             end,
-            cmd = "git status --short --branch --renames",
+            -- Pass cmd as a list so snacks runs git directly via jobstart
+            -- instead of through vim.o.shell. Going through the shell (nushell)
+            -- prints its "XDG_CONFIG_HOME ... is empty" startup warning into the
+            -- dashboard when launched from dirs like ~/dotfiles.
+            cmd = { "git", "status", "--short", "--branch", "--renames" },
             height = 5,
             padding = 1,
             ttl = 5 * 60,
